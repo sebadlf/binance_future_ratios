@@ -1,0 +1,25 @@
+Order Buy
+Chequear porque me cobro la comision en ADA
+{'symbol': 'ADAUSDT', 'orderId': 1429751614, 'orderListId': -1, 'clientOrderId': '7NGE376N1RKa6tqili6xVf', 'transactTime': 1620522698915, 'price': '0.00000000', 'origQty': '10.00000000', 'executedQty': '10.00000000', 'cummulativeQuoteQty': '16.06700000', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'fills': [{'price': '1.60670000', 'qty': '10.00000000', 'commission': '0.01000000', 'commissionAsset': 'ADA', 'tradeId': 146553202}]}
+
+Order Status
+{'symbol': 'ADAUSDT', 'orderId': 1429751614, 'orderListId': -1, 'clientOrderId': '7NGE376N1RKa6tqili6xVf', 'price': '0.00000000', 'origQty': '10.00000000', 'executedQty': '10.00000000', 'cummulativeQuoteQty': '16.06700000', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'stopPrice': '0.00000000', 'icebergQty': '0.00000000', 'time': 1620522698915, 'updateTime': 1620522698915, 'isWorking': True, 'origQuoteOrderQty': '0.00000000'}
+
+Transfer
+{'tranId': 58939758275}
+
+SELL FUTURE
+{'orderId': 583939478, 'symbol': 'ADAUSD_210625', 'pair': 'ADAUSD', 'status': 'NEW', 'clientOrderId': 'KQIkDI2Gdxr2bEpGoi3LY3', 'price': '0', 'avgPrice': '0.00000', 'origQty': '1', 'executedQty': '0', 'cumQty': '0', 'cumBase': '0', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'updateTime': 1620524536037}
+
+SELL FUTURE - Status
+{'orderId': 583939478, 'symbol': 'ADAUSD_210625', 'pair': 'ADAUSD', 'status': 'FILLED', 'clientOrderId': 'KQIkDI2Gdxr2bEpGoi3LY3', 'price': '0', 'avgPrice': '1.66156', 'origQty': '1', 'executedQty': '1', 'cumBase': '6.01844050', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'time': 1620524536037, 'updateTime': 1620524537810}
+
+BUY FUTURE
+{'orderId': 583960947, 'symbol': 'ADAUSD_210625', 'pair': 'ADAUSD', 'status': 'NEW', 'clientOrderId': 'WfLwY5AeIeahAEZfE9iosg', 'price': '0', 'avgPrice': '0.00000', 'origQty': '1', 'executedQty': '0', 'cumQty': '0', 'cumBase': '0', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '0', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'updateTime': 1620524848565}
+
+BUY FUTURE - Status
+{'orderId': 583960947, 'symbol': 'ADAUSD_210625', 'pair': 'ADAUSD', 'status': 'FILLED', 'clientOrderId': 'WfLwY5AeIeahAEZfE9iosg', 'price': '0', 'avgPrice': '1.66324', 'origQty': '1', 'executedQty': '1', 'cumBase': '6.01236141', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '0', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'time': 1620524848565, 'updateTime': 1620524848929}
+
+Transfer to spot
+{'tranId': 59232170870}
+
