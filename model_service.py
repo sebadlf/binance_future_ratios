@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session, aliased
 from datetime import datetime, timezone
 import operator as op
+from binance_service import binance_client
 
 import model
 
@@ -15,6 +16,29 @@ spot_symbols_with_futures = [
     'LTCUSDT',
     'XRPUSDT'
 ]
+
+def currencies():
+    futures_tickers = []
+    spot_tickers = []
+
+    info = binance_client.futures_coin_exchange_info()['symbols']
+    for i in info:
+        if i['contractType'] != 'PERPETUAL':
+            # print(i)
+
+            future_ticker = i['symbol']
+            pair = i['pair']
+            spot_ticker = i['pair'] + 'T'
+            contract_type = i['contractType']
+            futures_tickers.append({'symbol': future_ticker, 'pair': pair, 'contractType': contract_type})
+
+            if spot_ticker not in spot_tickers:
+                spot_tickers.append(spot_ticker)
+
+    return futures_tickers, spot_tickers
+
+
+
 
 def sync_spot(spot_list):
     with Session(model.engine) as session, session.begin():
@@ -141,3 +165,67 @@ def get_current_ratios():
         futures_info = sorted(futures_info, key=op.itemgetter('year_ratio'), reverse=True)
 
         return futures_info
+
+def save_historical_data_spot(symbol, historical_data):
+    with Session(model.engine) as session, session.begin():
+        for hour_data in historical_data:
+
+            market_data = model.SpotHistorical(symbol=symbol)
+            session.add(market_data)
+
+            market_data.open_time = datetime.fromtimestamp(hour_data[0]/1000)
+            market_data.open = hour_data[1]
+            market_data.high = hour_data[2]
+            market_data.low = hour_data[3]
+            market_data.close = hour_data[4]
+            market_data.volume = hour_data[5]
+            market_data.close_time = datetime.fromtimestamp(hour_data[6]/1000)
+            market_data.quote_asset_volume = hour_data[7]
+            market_data.trades = hour_data[8]
+            market_data.taker_buy_base = hour_data[9]
+            market_data.taker_buy_quote = hour_data[10]
+            market_data.ignore = hour_data[11]
+
+def save_historical_data_futures(symbol, historical_data):
+    with Session(model.engine) as session, session.begin():
+        for hour_data in historical_data:
+
+            market_data = model.SpotHistorical(symbol=symbol)
+            session.add(market_data)
+
+            market_data.open_time = datetime.fromtimestamp(hour_data[0]/1000)
+            market_data.open = hour_data[1]
+            market_data.high = hour_data[2]
+            market_data.low = hour_data[3]
+            market_data.close = hour_data[4]
+            market_data.volume = hour_data[5]
+            market_data.close_time = datetime.fromtimestamp(hour_data[6]/1000)
+            market_data.quote_asset_volume = hour_data[7]
+            market_data.trades = hour_data[8]
+            market_data.taker_buy_base = hour_data[9]
+            market_data.taker_buy_quote = hour_data[10]
+            market_data.ignore = hour_data[11]
+
+
+
+
+
+def last_date(symbol, conn,tabla = 'spot_historical'):
+
+    res = False
+
+    try:
+        query = f'SELECT `id`,`open_time` FROM {tabla} WHERE `symbol` = "{symbol}" ORDER BY `open_time` DESC limit 0,1'
+        res = conn.execute(query).fetchone()
+        fecha = res[1].strftime('%Y-%m-%d %H:%M:%S')
+        res = (res[0], fecha)
+    except:
+        print(f'no hay ultima fecha de {symbol}, bajando historico')
+
+    return res
+
+def del_row(last_date, conn, tabla = 'spot_historical'):
+
+    id = last_date[0]
+    query = f'DELETE FROM {tabla} WHERE `id`={id}'
+    conn.execute(query)
