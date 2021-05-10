@@ -45,3 +45,4 @@ def get_price_element(prices, symbol):
 
 # print(binance_client.order_market_sell(symbol='ADAUSDT', quantity=9.97560693))
 
+# print(binance_client.futures_coin_klines(symbol='ADAUSD_210625', interval='1m'))
