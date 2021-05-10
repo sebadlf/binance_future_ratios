@@ -104,8 +104,7 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
         print('Spot terminado, esperando 30 segundos')
         time.sleep(30)
 
-<<<<<<< HEAD
-# task_historical_spot()
-=======
-task_historical_futures()
->>>>>>> 06ece8588b10e8898b6c940dff321e722e0c6365
+
+if __name__ == '__main__':
+    # task_historical_spot()
+    task_historical_futures()
