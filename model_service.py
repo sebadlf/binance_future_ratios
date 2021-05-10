@@ -35,9 +35,6 @@ def currencies():
 
     return futures_tickers, spot_tickers
 
-
-
-
 def sync_spot(spot_list):
     with Session(model.engine) as session, session.begin():
         for spot in spot_list:

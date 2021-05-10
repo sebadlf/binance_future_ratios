@@ -19,7 +19,9 @@ def get_price_element(prices, symbol):
 
 
 # print(binance_client.order_market_buy(symbol='ADAUSDT', quantity=10))
+
 # print(binance_client.get_order(symbol='ADAUSDT', orderId="1429751614"))
+
 # print(binance_client.universal_transfer(type='MAIN_CMFUTURE', asset="ADA", amount=9.99))
 
 # print(binance_client.futures_coin_create_order(symbol="ADAUSD_210625", side="SELL", type="MARKET", quantity=1))
