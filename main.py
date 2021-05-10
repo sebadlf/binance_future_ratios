@@ -1,6 +1,10 @@
 from datetime import datetime, timezone
 from threading import Thread
 
+import time
+
+import model_service
+
 from binance_service import binance_client, filter_future_list, get_price_element
 
 from task_current_spot import task_current_spot
@@ -19,6 +23,12 @@ task_current_spot_price.start()
 
 task_current_futures_price = Thread(name="task_current_futures_price", target=task_current_futures_price)
 task_current_futures_price.start()
+
+
+
+time.sleep(10)
+
+[print(x) for x in model_service.get_current_ratios()]
 
 # futures = filter_future_list(binance_client.futures_coin_exchange_info())
 #
