@@ -7,13 +7,14 @@ import keys
 from datetime import datetime as dt
 import traceback
 import requests
+import binance.client
 
-def download_info_while(symbol, startTime, interval='4h', limit=1000):
+def download_info_while(symbol, startTime, interval='1m', limit=1000):
     startTime = int(dt.strptime(startTime, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 
     last_previous_date = False
 
-    endpoint = 'https://api.binance.com/api/v3/klines'
+    # endpoint = 'https://api.binance.com/api/v3/klines'
 
     md_acumulated = []
 
@@ -25,13 +26,15 @@ def download_info_while(symbol, startTime, interval='4h', limit=1000):
                 startTime = md_acumulated[-1][0]  # busco ultima fecha
                 md_acumulated = md_acumulated[0:-1]  # borro ultimo valor
 
-            params = {'symbol': symbol, 'interval': interval,
-                      'limit': limit,
-                      'startTime': startTime,
-                      # 'endTime': endTime
-                      }
+            # params = {'symbol': symbol, 'interval': interval,
+            #           'limit': limit,
+            #           'startTime': startTime,
+            #           # 'endTime': endTime
+            #           }
 
-            r = requests.get(endpoint, params=params).json()
+            # r = requests.get(endpoint, params=params).json()
+
+            r = binance_client.futures_coin_klines(symbol=symbol, interval= interval, limit= limit)
 
             if r == {'code': -1121, 'msg': 'Invalid symbol.'}:
                 print(f'Invalid symbol {symbol}. No pudo bajar la md')
@@ -72,7 +75,7 @@ def task_historical_spot(start_time = '2021-05-01 00:00:00'):
     db_connection = create_engine(keys.DB_CONNECTION)
 
     tickers = model_service.currencies()
-    tickers = tickers[1]
+    tickers = tickers[0]
 
     if not start_time:
         start_time = dt.fromisoformat('2021-01-01')
@@ -83,15 +86,17 @@ def task_historical_spot(start_time = '2021-05-01 00:00:00'):
             print(ticker, end=', ')
 
             try:
-                last_date = model_service.last_date(ticker, db_connection)
+                last_date = model_service.last_date(ticker, db_connection, tabla= 'futures_historical')
 
                 if last_date:
-                    model_service.del_row(last_date, db_connection)
+                    model_service.del_row(last_date, db_connection, tabla= 'futures_historical')
                     start_time = last_date[1]
 
                 historical_data = getHistorical(ticker, startTime= start_time)
+
                 if historical_data != []:
-                    model_service.save_historical_data_spot(ticker, historical_data)
+                    model_service.save_historical_data_futures(ticker, historical_data)
+
             except:
                 traceback.print_exc()
                 pass

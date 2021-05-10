@@ -27,10 +27,8 @@ def currencies():
             # print(i)
 
             future_ticker = i['symbol']
-            pair = i['pair']
             spot_ticker = i['pair'] + 'T'
-            contract_type = i['contractType']
-            futures_tickers.append({'symbol': future_ticker, 'pair': pair, 'contractType': contract_type})
+            futures_tickers.append(future_ticker)
 
             if spot_ticker not in spot_tickers:
                 spot_tickers.append(spot_ticker)
@@ -190,7 +188,7 @@ def save_historical_data_futures(symbol, historical_data):
     with Session(model.engine) as session, session.begin():
         for hour_data in historical_data:
 
-            market_data = model.SpotHistorical(symbol=symbol)
+            market_data = model.FuturesHistorical(symbol=symbol)
             session.add(market_data)
 
             market_data.open_time = datetime.fromtimestamp(hour_data[0]/1000)

@@ -141,28 +141,28 @@ class SpotHistorical(Base):
     __table_args__ = (
         Index('symbol', symbol, open_time),
     )
-#
-# class FuturesHistorical(Base):
-#     __tablename__ = 'futures_historical'
-#
-#     id = Column(Integer, primary_key=True)
-#     symbol = Column(String(10), ForeignKey('futures.symbol'))
-#     open_time = Column(DATETIME)
-#     open = Column(Float)
-#     high = Column(Float)
-#     low = Column(Float)
-#     close = Column(Float)
-#     volume = Column(Float)
-#     close_time = Column(DATETIME)
-#     quote_asset_volume = Column(Float)
-#     trades = Column(Integer)
-#     taker_buy_base = Column(Float)
-#     taker_buy_quote = Column(Float)
-#     ignore = Column(Float)
-#
-#     __table_args__ = (
-#         Index('symbol', symbol, open_time),
-#     )
+
+class FuturesHistorical(Base):
+    __tablename__ = 'futures_historical'
+
+    id = Column(Integer, primary_key=True)
+    symbol = Column(String(20), ForeignKey('future.symbol'))
+    open_time = Column(DATETIME)
+    open = Column(Float)
+    high = Column(Float)
+    low = Column(Float)
+    close = Column(Float)
+    volume = Column(Float)
+    close_time = Column(DATETIME)
+    quote_asset_volume = Column(Float)
+    trades = Column(Integer)
+    taker_buy_base = Column(Float)
+    taker_buy_quote = Column(Float)
+    ignore = Column(Float)
+
+    __table_args__ = (
+        Index('symbol', symbol, open_time),
+    )
 
 
 engine = create_engine(keys.DB_CONNECTION)
