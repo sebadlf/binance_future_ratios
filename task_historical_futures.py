@@ -71,7 +71,6 @@ def getHistorical(symbol, startTime, endTime = None, quote_currency='USDT', inte
     return r
 
 def task_historical_futures(start_time = '2021-05-01 00:00:00'):
-
     time.sleep(10)
 
     db_connection = create_engine(keys.DB_CONNECTION)
@@ -105,4 +104,8 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
         print('Spot terminado, esperando 30 segundos')
         time.sleep(30)
 
+<<<<<<< HEAD
 # task_historical_spot()
+=======
+task_historical_futures()
+>>>>>>> 06ece8588b10e8898b6c940dff321e722e0c6365
