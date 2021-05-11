@@ -48,3 +48,13 @@ def get_price_element(prices, symbol):
 # print(binance_client.order_market_sell(symbol='ADAUSDT', quantity=9.97560693))
 
 # print(binance_client.futures_coin_klines(symbol='ADAUSD_210625', interval='1m'))
+
+
+# print(binance_client.order_market_buy(symbol='ADAUSDT', quantity=30))
+#
+# print(binance_client.order_market_sell(symbol='ADAUSDT', quantity=30))
+
+# print(binance_client.get_order(symbol='ADAUSDT', orderId="1442982166"))
+
+# {'symbol': 'ADAUSDT', 'orderId': 1442982166, 'orderListId': -1, 'clientOrderId': 'KsDTxPbIIJmjzJ2lTvXaYp', 'transactTime': 1620680129133, 'price': '0.00000000', 'origQty': '30.00000000', 'executedQty': '30.00000000', 'cummulativeQuoteQty': '48.87900000', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'fills': [{'price': '1.62930000', 'qty': '30.00000000', 'commission': '0.00005892', 'commissionAsset': 'BNB', 'tradeId': 149870785}]}
+# {'symbol': 'ADAUSDT', 'orderId': 1442982166, 'orderListId': -1, 'clientOrderId': 'KsDTxPbIIJmjzJ2lTvXaYp', 'price': '0.00000000', 'origQty': '30.00000000', 'executedQty': '30.00000000', 'cummulativeQuoteQty': '48.87900000', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'stopPrice': '0.00000000', 'icebergQty': '0.00000000', 'time': 1620680129133, 'updateTime': 1620680129133, 'isWorking': True, 'origQuoteOrderQty': '0.00000000'}

@@ -202,8 +202,105 @@ def save_historical_data_futures(symbol, historical_data):
             market_data.ignore = hour_data[11]
 
 
+def sync_spot_order(spot_order_dict, spot_order=None, position_id=None):
+
+    if not spot_order:
+        spot_order = model.SpotOrder()
+
+    if position_id:
+        spot_order.position_id = position_id
+
+    spot_order.symbol = spot_order_dict['symbol']
+    spot_order.order_id = spot_order_dict['orderId']
+    spot_order.order_list_id = spot_order_dict['orderListId']
+    spot_order.client_order_id = spot_order_dict['clientOrderId']
+
+    if spot_order_dict.get('transactTime'):
+        spot_order.transact_timestamp = spot_order_dict['transactTime']
+        spot_order.transact_time = datetime.fromtimestamp(spot_order_dict['transactTime'] / 1000)
+
+    spot_order.price = spot_order_dict['price']
+    spot_order.orig_qty = spot_order_dict['origQty']
+    spot_order.executed_qty = spot_order_dict['executedQty']
+    spot_order.cummulative_quote_qty = spot_order_dict['cummulativeQuoteQty']
+    spot_order.status = spot_order_dict['status']
+    spot_order.time_in_force = spot_order_dict['timeInForce']
+    spot_order.type = spot_order_dict['type']
+    spot_order.side = spot_order_dict['side']
+
+    if spot_order_dict.get('qty'):
+        spot_order.qty = spot_order_dict['qty']
+
+    if spot_order_dict.get('commission'):
+        spot_order.commission = spot_order_dict['commission']
+
+    if spot_order_dict.get('commissionAsset'):
+        spot_order.commission_asset = spot_order_dict['commissionAsset']
+
+    if spot_order_dict.get('tradeId'):
+        spot_order.trade_id = spot_order_dict['tradeId']
+
+    if spot_order_dict.get('stopPrice'):
+        spot_order.stop_price = spot_order_dict['stopPrice']
+
+    if spot_order_dict.get('icebergQty'):
+        spot_order.iceberg_qty = spot_order_dict['icebergQty']
+
+    if spot_order_dict.get('time'):
+        spot_order.timestamp = spot_order_dict['time']
+        spot_order.time = datetime.fromtimestamp(spot_order_dict['time'] / 1000)
+
+    if spot_order_dict.get('updateTime'):
+        spot_order.update_timestamp = spot_order_dict['updateTime']
+        spot_order.update_time = datetime.fromtimestamp(spot_order_dict['updateTime'] / 1000)
+
+    if spot_order_dict.get('isWorking'):
+        spot_order.is_working = spot_order_dict['isWorking']
+
+    if spot_order_dict.get('origQuoteOrderQty'):
+        spot_order.orig_quote_order_qty = spot_order_dict['origQuoteOrderQty']
+
+    return spot_order
 
 
+def sync_future_order(future_order_dict, future_order=None, position_id=None):
+
+    if not future_order:
+        future_order = model.FutureOrder()
+
+    if position_id:
+        future_order.position_id = position_id
+
+    future_order.order_id = future_order_dict['orderId']
+    future_order.symbol = future_order_dict['symbol']
+    future_order.pair = future_order_dict['pair']
+    future_order.status = future_order_dict['status']
+    future_order.client_order_id = future_order_dict['clientOrderId']
+    future_order.price = future_order_dict['price']
+    future_order.avg_price = future_order_dict['avgPrice']
+    future_order.orig_qty = future_order_dict['origQty']
+    future_order.executed_qty = future_order_dict['executedQty']
+
+    if future_order_dict.get('cumQty'):
+        future_order.cum_qty = future_order_dict['cumQty']
+
+    future_order.cum_base = future_order_dict['cumBase']
+    future_order.time_in_force = future_order_dict['timeInForce']
+    future_order.type = future_order_dict['type']
+    future_order.reduce_only = future_order_dict['reduceOnly']
+    future_order.close_position = future_order_dict['closePosition']
+    future_order.side = future_order_dict['side']
+    future_order.position_side = future_order_dict['positionSide']
+    future_order.stop_price = future_order_dict['stopPrice']
+    future_order.working_type = future_order_dict['workingType']
+    future_order.price_protect = future_order_dict['priceProtect']
+    future_order.orig_type = future_order_dict['origType']
+
+    if future_order_dict.get('updateTime'):
+        future_order.update_timestamp = future_order_dict['updateTime']
+        future_order.update_time = datetime.fromtimestamp(future_order_dict['updateTime'] / 1000)
+
+    return future_order
 
 def last_date(symbol, conn,tabla = 'spot_historical'):
 
@@ -224,3 +321,25 @@ def del_row(last_date, conn, tabla = 'spot_historical'):
     id = last_date[0]
     query = f'DELETE FROM {tabla} WHERE `id`={id}'
     conn.execute(query)
+
+if __name__ == '__main__':
+
+    import demo_data
+
+    with Session(model.engine) as session, session.begin():
+        # session.add(sync_spot_order(order_1))
+
+        # order_id = demo_data.spot_order_2['orderId']
+        #
+        # order_db = session.query(model.SpotOrder).filter_by(order_id=order_id).first()
+        #
+        # session.add(sync_spot_order(demo_data.spot_order_2, spot_order=order_db))
+
+        order_id = demo_data.future_order_2['orderId']
+
+        order_db = session.query(model.FutureOrder).filter_by(order_id=order_id).first()
+
+        session.add(sync_future_order(demo_data.future_order_2, future_order=order_db))
+
+
+

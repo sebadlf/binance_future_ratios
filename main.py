@@ -33,9 +33,9 @@ task_historical_futures = Thread(name="task_historical_futures", target=task_his
 task_historical_futures.start()
 
 
-# time.sleep(10)
+time.sleep(10)
 
-# [print(x) for x in model_service.get_current_ratios()]
+[print(x) for x in model_service.get_current_ratios()]
 
 # futures = filter_future_list(binance_client.futures_coin_exchange_info())
 #
