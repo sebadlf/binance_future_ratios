@@ -118,4 +118,5 @@ def task_historical_spot(start_time = '2021-05-01 00:00:00'):
         # print('Spot terminado, esperando 30 segundos')
         time.sleep(30)
 
-# task_historical_spot()
+if __name__ == '__main__':
+    task_historical_spot()

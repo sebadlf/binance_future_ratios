@@ -28,15 +28,8 @@ def download_info_while(symbol, startTime, interval='1m', limit=1000):
                 startTime = md_acumulated[-1][0]  # busco ultima fecha
                 md_acumulated = md_acumulated[0:-1]  # borro ultimo valor
 
-            # params = {'symbol': symbol, 'interval': interval,
-            #           'limit': limit,
-            #           'startTime': startTime,
-            #           # 'endTime': endTime
-            #           }
-
-            # r = requests.get(endpoint, params=params).json()
-
-            r = binance_client.futures_coin_klines(symbol=symbol, interval= interval, limit= limit)
+            r = binance_client.futures_coin_klines(symbol=symbol, interval= interval, limit= limit,
+                                                   startTime = startTime)
 
             if r == {'code': -1121, 'msg': 'Invalid symbol.'}:
                 print(f'Invalid symbol {symbol}. No pudo bajar la md')
@@ -66,14 +59,12 @@ def getHistorical(symbol, startTime, endTime = None, quote_currency='USDT', inte
             startTime: %Y-%m-%d
             endTime: %Y-%m-%d OR "hoy"
             """
-    # symbol += quote_currency
 
     r = download_info_while(symbol, startTime, interval=interval, limit=limit)
 
     return r
 
 def task_historical_futures(start_time = '2021-05-01 00:00:00'):
-    time.sleep(10)
 
     db_connection = create_engine(keys.DB_CONNECTION)
 
@@ -106,7 +97,5 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
         # print('Spot terminado, esperando 30 segundos')
         time.sleep(30)
 
-
 if __name__ == '__main__':
-    # task_historical_spot()
     task_historical_futures()
