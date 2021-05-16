@@ -9,6 +9,8 @@ import traceback
 import requests
 import binance.client
 
+from task_historical_spot import currencies
+
 def download_info_while(symbol, startTime, interval='1m', limit=1000):
     startTime = int(dt.strptime(startTime, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 
@@ -75,7 +77,7 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
 
     db_connection = create_engine(keys.DB_CONNECTION)
 
-    tickers = model_service.currencies()
+    tickers = currencies()
     tickers = tickers[0]
 
     if not start_time:
@@ -84,7 +86,7 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
     while app.running:
         for ticker in tickers:
 
-            print(ticker, end=', ')
+            # print(ticker, end=', ')
 
             try:
                 last_date = model_service.last_date(ticker, db_connection, tabla= 'futures_historical')
@@ -101,7 +103,7 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
             except:
                 traceback.print_exc()
                 pass
-        print('Spot terminado, esperando 30 segundos')
+        # print('Spot terminado, esperando 30 segundos')
         time.sleep(30)
 
 

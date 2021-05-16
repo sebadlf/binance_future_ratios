@@ -67,13 +67,31 @@ def getHistorical(symbol, startTime, endTime = None, quote_currency='USDT', inte
 
     return r
 
+def currencies():
+    futures_tickers = []
+    spot_tickers = []
+
+    info = binance_client.futures_coin_exchange_info()['symbols']
+    for i in info:
+        if i['contractType'] != 'PERPETUAL':
+            # print(i)
+
+            future_ticker = i['symbol']
+            spot_ticker = i['pair'] + 'T'
+            futures_tickers.append(future_ticker)
+
+            if spot_ticker not in spot_tickers:
+                spot_tickers.append(spot_ticker)
+
+    return futures_tickers, spot_tickers
+
 def task_historical_spot(start_time = '2021-05-01 00:00:00'):
 
     time.sleep(10)
 
     db_connection = create_engine(keys.DB_CONNECTION)
 
-    tickers = model_service.currencies()
+    tickers = currencies()
     tickers = tickers[1]
 
     if not start_time:
@@ -82,7 +100,7 @@ def task_historical_spot(start_time = '2021-05-01 00:00:00'):
     while app.running:
         for ticker in tickers:
 
-            print(ticker, end=', ')
+            # print(ticker, end=', ')
 
             try:
                 last_date = model_service.last_date(ticker, db_connection)
@@ -97,7 +115,7 @@ def task_historical_spot(start_time = '2021-05-01 00:00:00'):
             except:
                 traceback.print_exc()
                 pass
-        print('Spot terminado, esperando 30 segundos')
+        # print('Spot terminado, esperando 30 segundos')
         time.sleep(30)
 
 # task_historical_spot()
