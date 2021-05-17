@@ -4,6 +4,26 @@ import pandas as pd
 from model import engine
 import traceback
 
+from binance_service import binance_client
+
+def currencies():
+    futures_tickers = []
+    spot_tickers = []
+
+    info = binance_client.futures_coin_exchange_info()['symbols']
+    for i in info:
+        if i['contractType'] != 'PERPETUAL':
+            # print(i)
+
+            future_ticker = i['symbol']
+            spot_ticker = i['pair'] + 'T'
+            futures_tickers.append(future_ticker)
+
+            if spot_ticker not in spot_tickers:
+                spot_tickers.append(spot_ticker)
+
+    return futures_tickers, spot_tickers
+
 
 def get_quantity_rounded(quantity, quantity_increment):
 
@@ -18,20 +38,21 @@ def get_quantity_rounded(quantity, quantity_increment):
     return result
 
 
-def bring_data_db(ticker, k ,table):
-    query = f'select * from (select * from {table} where symbol = "{ticker}" order by open_time desc limit 0, {k}) data order by open_time asc'
+def bring_data_db(ticker, k ,table, column_name_symbol = 'future_symbol'):
+    query = f'select * from (select * from {table} where {column_name_symbol} = "{ticker}" order by open_time desc limit 0, {k}) data order by open_time asc'
     df = pd.read_sql(query, engine)
     df.set_index('open_time', inplace=True)
-    df.drop(['id', 'open', 'high', 'low', 'volume', 'close_time', 'quote_asset_volume', 'trades', 'taker_buy_base', 'taker_buy_quote', 'ignore'],
+    df.drop(['future_price', 'spot_symbol', 'spot_price', 'direct_ratio', 'hours', 'hour_ratio', 'days', 'contract_size', 'buy_per_contract', 'tick_size', 'base_asset'],
             axis=1, inplace=True)
 
     return df
 
-def sma(ticker, k, table):
+
+def sma(ticker, k, table, column_name = 'year_ratio'):
     k_adjusted = k
     try:
         data = bring_data_db(ticker,  k_adjusted, table)
-        data['sma'] = data.close.rolling(k).mean()
+        data['sma'] = data[column_name].rolling(k).mean()
 
         return data.iloc[-1,2]
 
@@ -39,11 +60,11 @@ def sma(ticker, k, table):
         traceback.print_exc()
         return None
 
-def ema(ticker, k, table):
+def ema(ticker, k, table, column_name = 'year_ratio'):
     k_adjusted = (k*2) + 10
     try:
         data = bring_data_db(ticker,  k_adjusted, table)
-        data['ema'] = data.close.ewm(span= k, adjust=False).mean()
+        data['ema'] = data[column_name].ewm(span= k, adjust=False).mean()
 
         return data.iloc[-1,2]
 

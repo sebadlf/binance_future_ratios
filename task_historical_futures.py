@@ -9,7 +9,7 @@ import traceback
 import requests
 import binance.client
 
-from task_historical_spot import currencies
+import utils
 
 def download_info_while(symbol, startTime, interval='1m', limit=1000):
     startTime = int(dt.strptime(startTime, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
@@ -68,7 +68,7 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
 
     db_connection = create_engine(keys.DB_CONNECTION)
 
-    tickers = currencies()
+    tickers = utils.currencies()
     tickers = tickers[0]
 
     if not start_time:

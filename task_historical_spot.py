@@ -3,6 +3,7 @@ import time
 import app
 import model_service
 from sqlalchemy import create_engine
+import utils
 import keys
 from datetime import datetime as dt
 import traceback
@@ -67,23 +68,23 @@ def getHistorical(symbol, startTime, endTime = None, quote_currency='USDT', inte
 
     return r
 
-def currencies():
-    futures_tickers = []
-    spot_tickers = []
-
-    info = binance_client.futures_coin_exchange_info()['symbols']
-    for i in info:
-        if i['contractType'] != 'PERPETUAL':
-            # print(i)
-
-            future_ticker = i['symbol']
-            spot_ticker = i['pair'] + 'T'
-            futures_tickers.append(future_ticker)
-
-            if spot_ticker not in spot_tickers:
-                spot_tickers.append(spot_ticker)
-
-    return futures_tickers, spot_tickers
+# def currencies():
+#     futures_tickers = []
+#     spot_tickers = []
+#
+#     info = binance_client.futures_coin_exchange_info()['symbols']
+#     for i in info:
+#         if i['contractType'] != 'PERPETUAL':
+#             # print(i)
+#
+#             future_ticker = i['symbol']
+#             spot_ticker = i['pair'] + 'T'
+#             futures_tickers.append(future_ticker)
+#
+#             if spot_ticker not in spot_tickers:
+#                 spot_tickers.append(spot_ticker)
+#
+#     return futures_tickers, spot_tickers
 
 def task_historical_spot(start_time = '2021-05-01 00:00:00'):
 
@@ -91,7 +92,7 @@ def task_historical_spot(start_time = '2021-05-01 00:00:00'):
 
     db_connection = create_engine(keys.DB_CONNECTION)
 
-    tickers = currencies()
+    tickers = utils.currencies()
     tickers = tickers[1]
 
     if not start_time:
