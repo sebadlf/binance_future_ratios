@@ -419,9 +419,36 @@ class CurrentRatios(Base):
     tick_size = Column(Float)
     base_asset = Column(String(20))
 
+
+class CurrentOperationToClose(Base):
+    __tablename__ = 'current_operation_to_close'
+
+    position_id = Column(Integer, primary_key=True)
+    operation_id = Column(Integer)
+    future_symbol = Column(String(20))
+    future_price = Column(Float)
+    spot_symbol = Column(String(20))
+    spot_price = Column(Float)
+    direct_ratio = Column(Float)
+    hours = Column(Integer)
+    hour_ratio = Column(Float)
+    days = Column(Integer)
+    year_ratio = Column(Float)
+    contract_size = Column(Integer)
+    buy_per_contract = Column(Float)
+    tick_size = Column(Float)
+    base_asset = Column(String(20))
+    contract_qty = Column(Integer)
+    transfer_amount = Column(Float)
+    future_base_qty = Column(Float)
+    future_commission = Column(Float)
+    direct_ratio_diff = Column(Float)
+    year_ratio_diff = Column(Float)
+    better_future_symbol = Column(String(20))
+
 engine = create_engine(keys.DB_CONNECTION)
 
-view_tables = ['current_ratios']
+view_tables = ['current_ratios', 'current_operation_to_close']
 
 real_tables = [table_value for (table_key, table_value) in Base.metadata.tables.items() if table_key not in view_tables]
 
