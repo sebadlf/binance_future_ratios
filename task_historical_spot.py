@@ -86,7 +86,7 @@ def getHistorical(symbol, startTime, endTime = None, quote_currency='USDT', inte
 #
 #     return futures_tickers, spot_tickers
 
-def task_historical_spot(start_time = '2021-05-01 00:00:00'):
+def task_historical_spot(start_time = '2021-04-01 00:00:00'):
 
     time.sleep(10)
 
@@ -116,7 +116,7 @@ def task_historical_spot(start_time = '2021-05-01 00:00:00'):
             except:
                 traceback.print_exc()
                 pass
-        # print('Spot terminado, esperando 30 segundos')
+        print('Spot terminado, esperando 30 segundos')
         time.sleep(30)
 
 if __name__ == '__main__':
