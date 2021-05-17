@@ -16,6 +16,7 @@ from task_current_futures import task_current_futures
 from task_current_futures_price import task_current_futures_price
 from task_historical_spot import task_historical_spot
 from task_historical_futures import task_historical_futures
+from task_current_signal import task_current_signal
 
 task_current_futures = Thread(name="task_current_futures", target=task_current_futures)
 task_current_futures.start()
@@ -35,9 +36,12 @@ task_historical_spot.start()
 task_historical_futures = Thread(name="task_historical_futures", target=task_historical_futures)
 task_historical_futures.start()
 
-init_leverages()
+# init_leverages()
 
 time.sleep(10)
+
+task_current_signal = Thread(name="task_current_signal", target=task_current_signal)
+task_current_signal.start()
 
 # best_position = [row for row in model_service.get_current_ratios()][0]
 #

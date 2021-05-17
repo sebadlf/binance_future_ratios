@@ -373,6 +373,20 @@ def del_row(last_date, conn, tabla='spot_historical'):
     query = f'DELETE FROM {tabla} WHERE `id`={id}'
     conn.execute(query)
 
+def save_current_signal(symbol, data):
+    from datetime import datetime
+    with Session(model.engine) as session, session.begin():
+
+        save_current = session.query(model.CurrentSignal).get(symbol)
+
+        if not save_current:
+            save_current = model.CurrentSignal(symbol=symbol)
+            session.add(save_current)
+
+        save_current.time = datetime.utcnow()
+        save_current.signal = data
+
+
 
 if __name__ == '__main__':
     pass
