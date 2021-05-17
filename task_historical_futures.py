@@ -80,10 +80,10 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
             # print(ticker, end=', ')
 
             try:
-                last_date = model_service.last_date(ticker, db_connection, tabla= 'futures_historical')
+                last_date = model_service.last_date(ticker, db_connection, tabla= 'future_historical')
 
                 if last_date:
-                    model_service.del_row(last_date, db_connection, tabla= 'futures_historical')
+                    model_service.del_row(last_date, db_connection, tabla= 'future_historical')
                     start_time = last_date[1]
 
                 historical_data = getHistorical(ticker, startTime= start_time)
@@ -94,7 +94,7 @@ def task_historical_futures(start_time = '2021-05-01 00:00:00'):
             except:
                 traceback.print_exc()
                 pass
-        # print('Spot terminado, esperando 30 segundos')
+        # print('Futures terminado, esperando 30 segundos')
         time.sleep(30)
 
 if __name__ == '__main__':
