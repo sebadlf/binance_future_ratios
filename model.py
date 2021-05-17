@@ -446,6 +446,13 @@ class CurrentOperationToClose(Base):
     year_ratio_diff = Column(Float)
     better_future_symbol = Column(String(20))
 
+class CurrentSignal(Base):
+    __tablename__ = 'current_signal'
+
+    symbol = Column(String(20), ForeignKey('future.symbol'), primary_key=True)
+    time = Column(DATETIME)
+    signal = Column(String(20))
+
 engine = create_engine(keys.DB_CONNECTION)
 
 view_tables = ['current_ratios', 'current_operation_to_close']
