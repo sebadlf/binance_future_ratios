@@ -386,8 +386,5 @@ def save_current_signal(symbol, data):
         save_current.time = datetime.utcnow()
         save_current.signal = data
 
-
-
-
 if __name__ == '__main__':
     pass
