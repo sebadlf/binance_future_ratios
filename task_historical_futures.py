@@ -6,8 +6,6 @@ from sqlalchemy import create_engine
 import keys
 from datetime import datetime as dt
 import traceback
-import requests
-import binance.client
 
 import utils
 
