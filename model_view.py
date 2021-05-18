@@ -25,10 +25,10 @@ current_ratios = '''
             s.symbol as spot_symbol,
             sp.price as spot_price,
             ((fp.mark_price / sp.price - 1) * 100) as direct_ratio,
-            TIMESTAMPDIFF(HOUR, curdate(), f.delivery_date) + 1 as hours,
-            ((fp.mark_price / sp.price - 1) * 100) / (TIMESTAMPDIFF(HOUR, curdate(), f.delivery_date) + 1) as hour_ratio,
-            TIMESTAMPDIFF(DAY, curdate(), f.delivery_date) days,
-            ((fp.mark_price / sp.price - 1) * 100) / (TIMESTAMPDIFF(hour, curdate(), f.delivery_date) + 1)  * 24 * 365 as year_ratio,
+            TIMESTAMPDIFF(HOUR, now(), f.delivery_date) + 1 as hours,
+            ((fp.mark_price / sp.price - 1) * 100) / (TIMESTAMPDIFF(HOUR, now(), f.delivery_date) + 1) as hour_ratio,
+            TIMESTAMPDIFF(DAY, now(), f.delivery_date) days,
+            ((fp.mark_price / sp.price - 1) * 100) / (TIMESTAMPDIFF(hour, now(), f.delivery_date) + 1)  * 24 * 365 as year_ratio,
             f.contract_size,
             f.contract_size / fp.mark_price as buy_per_contract,
             s.tick_size,
@@ -41,7 +41,7 @@ current_ratios = '''
     JOIN 	future_price fp
     ON		f.symbol = fp.symbol
     WHERE	f.symbol NOT LIKE (:perp_like)
-            AND	delivery_date > curdate()
+            AND	delivery_date > now()
     ORDER BY
             year_ratio DESC
     '''
@@ -75,14 +75,14 @@ current_operation_to_close = '''
     LEFT JOIN	current_ratios ocr
     ON		ocr.direct_ratio - o.direct_ratio > 0
             AND ocr.year_ratio - o.year_ratio > 0
-    HAVING	direct_ratio_diff > 0.4
+    -- HAVING	direct_ratio_diff > 0.4
     '''
 
 create_view("current_operation_to_close", current_operation_to_close)
 
 historical_ratios = '''
     SELECT 	fh.open_time,
-    		f.symbol as future_symbol,
+            f.symbol as future_symbol,
             fh.close as future_price,
             s.symbol as spot_symbol,
             sh.close as spot_price,

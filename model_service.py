@@ -149,6 +149,44 @@ def get_current_ratios():
         return futures_info
 
 
+def get_current_operations_to_close():
+    futures_info = []
+
+    with Session(model.engine) as session, session.begin():
+        current_operation_to_close = session.query(model.CurrentOperationToClose).all()
+
+        for operation_to_close in current_operation_to_close:
+
+            futures_info.append({
+                'position_id': operation_to_close.position_id,
+                'operation_id': operation_to_close.operation_id,
+                'future_symbol': operation_to_close.future_symbol,
+                'future_price': operation_to_close.future_price,
+                'spot_symbol': operation_to_close.spot_symbol,
+                'spot_price': operation_to_close.spot_price,
+                'direct_ratio': operation_to_close.direct_ratio,
+                'hours': operation_to_close.hours,
+                'hour_ratio': operation_to_close.hour_ratio,
+                'days': operation_to_close.days,
+                'year_ratio': operation_to_close.year_ratio,
+                'contract_size': operation_to_close.contract_size,
+                'buy_per_contract': operation_to_close.buy_per_contract,
+                'tick_size': operation_to_close.tick_size,
+                'base_asset': operation_to_close.base_asset,
+
+                'contract_qty': operation_to_close.contract_qty,
+                'transfer_amount': operation_to_close.transfer_amount,
+                'future_base_qty': operation_to_close.future_base_qty,
+                'future_commission': operation_to_close.future_commission,
+
+                'direct_ratio_diff': operation_to_close.direct_ratio_diff,
+                'year_ratio_diff': operation_to_close.year_ratio_diff,
+                'better_future_symbol': operation_to_close.better_future_symbol,
+
+            })
+
+        return futures_info
+
 def save_historical_data_spot(symbol, historical_data):
     with Session(model.engine) as session, session.begin():
         for hour_data in historical_data:
@@ -206,6 +244,16 @@ def create_position(position_dict: Dict) -> model.Position:
 
     return position_id
 
+def change_position_state(position_id, state):
+    try:
+        with Session(model.engine) as session, session.begin():
+            position = session.query(model.Position).get(position_id)
+
+            position.state = state
+    except Exception as ex:
+        print(f"Error al guardar estado {state} en Position {position_id}")
+        print(ex)
+        traceback.print_stack()
 
 def save_operation(operation_dict: Dict) -> int:
 

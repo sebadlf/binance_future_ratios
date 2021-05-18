@@ -45,29 +45,29 @@ def get_future_order(symbol, order_id):
 
     return order
 
-def get_spot_trade(symbol, order_id):
+def get_spot_trade(symbol, order_id, qty):
     trade = None
 
-    while not trade:
+    while not trade or (abs((sum([float(t['qty']) for t in trade]) / qty) - 1) > 0.001):
         # binance_trades = binance_client.get_my_trades(symbol=symbol, fromId=from_id)
         binance_trades = binance_client.get_my_trades(symbol=symbol)
 
         trades = [trade for trade in binance_trades if trade['orderId'] == order_id]
 
-        trade = trades[0] if len(trades) else None
+        trade = trades if len(trades) else None
 
     return trade
 
-def get_future_trade(symbol, order_id):
+def get_future_trade(symbol, order_id, qty):
     trade = None
 
-    while not trade:
+    while not trade or sum([int(t['qty']) for t in trade]) < qty:
         # binance_trades = binance_client.get_my_trades(symbol=symbol, fromId=from_id)
         binance_trades = binance_client.futures_coin_account_trades(symbol=symbol)
 
         trades = [trade for trade in binance_trades if trade['orderId'] == int(order_id)]
 
-        trade = trades[0] if len(trades) else None
+        trade = trades if len(trades) else None
 
     return trade
 
