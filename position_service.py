@@ -157,7 +157,6 @@ def close_position(position_dict: Dict):
         base_asset = position_dict['base_asset']
         contract_qty = position_dict['contract_qty']
         transfer_amount = position_dict['transfer_amount']
-        sell_total_amount = position_dict['future_base_qty'] + position_dict['future_commission']
 
         future_order = binance_client.futures_coin_create_order(symbol=future_symbol, side="BUY", type="MARKET", quantity=contract_qty)
         # future_order = data['future_order']
@@ -167,9 +166,10 @@ def close_position(position_dict: Dict):
         future_trade = binance_service.get_future_trade(future_symbol, future_order_id, contract_qty)
         # future_trade = data['future_trade']
 
-        buy_net_amount = sum([float(ft['baseQty']) - float(ft['commission']) for ft in future_trade])
+        realized_pnl_sum = sum([float(ft['realizedPnl']) for ft in future_trade])
 
-        quantity_to_sell = transfer_amount - sell_total_amount + buy_net_amount
+        quantity_to_sell = transfer_amount + realized_pnl_sum
+
         quantity_to_sell = utils.get_quantity_rounded(quantity_to_sell, tick_size)
         #
         transfer = binance_client.universal_transfer(type=CLOSE_POSITION_TRANSFER_TYPE, asset=base_asset, amount=quantity_to_sell)
@@ -276,4 +276,21 @@ def save_closed_position(data_dict: Dict):
 
 
 if __name__ == '__main__':
-    save_closed_position(position_to_save)
+    transfer_amount = 0.483
+
+    future_trade = binance_service.get_future_trade("DOTUSD_210625", 518223677, 2)
+
+    print(future_trade)
+
+    realized_pnl_sum = sum([float(ft['realizedPnl']) for ft in future_trade])
+
+    quantity_to_sell = transfer_amount + realized_pnl_sum
+
+    quantity_to_sell = utils.get_quantity_rounded(quantity_to_sell, 0.001)
+
+    print(quantity_to_sell)
+
+    quantity_to_sell = utils.get_quantity_rounded(0.48566470999999994, 0.001)
+
+    print(quantity_to_sell)
+

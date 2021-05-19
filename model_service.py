@@ -126,7 +126,9 @@ def get_current_ratios():
     futures_info = []
 
     with Session(model.engine) as session, session.begin():
-        future_ratios = session.query(model.CurrentRatios).all()
+        future_ratios = session.query(model.CurrentRatios).\
+            filter(model.CurrentRatios.signal == 'open').\
+            filter(model.CurrentRatios.year_ratio > 20).all()
 
         for future_ratio in future_ratios:
 
@@ -144,6 +146,7 @@ def get_current_ratios():
                 'buy_per_contract': future_ratio.buy_per_contract,
                 'tick_size': future_ratio.tick_size,
                 'base_asset': future_ratio.base_asset,
+                'signal': future_ratio.signal
             })
 
         return futures_info
@@ -153,7 +156,9 @@ def get_current_operations_to_close():
     futures_info = []
 
     with Session(model.engine) as session, session.begin():
-        current_operation_to_close = session.query(model.CurrentOperationToClose).all()
+        current_operation_to_close = session.query(model.CurrentOperationToClose).\
+            filter(model.CurrentOperationToClose.signal == 'close').\
+            filter(model.CurrentOperationToClose.direct_ratio_diff > 0.25).all()
 
         for operation_to_close in current_operation_to_close:
 
@@ -173,6 +178,7 @@ def get_current_operations_to_close():
                 'buy_per_contract': operation_to_close.buy_per_contract,
                 'tick_size': operation_to_close.tick_size,
                 'base_asset': operation_to_close.base_asset,
+                'signal': operation_to_close.signal,
 
                 'contract_qty': operation_to_close.contract_qty,
                 'transfer_amount': operation_to_close.transfer_amount,

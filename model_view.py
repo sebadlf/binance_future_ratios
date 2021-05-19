@@ -32,7 +32,8 @@ current_ratios = '''
             f.contract_size,
             f.contract_size / fp.mark_price as buy_per_contract,
             s.tick_size,
-            s.base_asset
+            s.base_asset,
+            cs.signal
     FROM 	spot s
     JOIN 	spot_price sp
     ON		s.symbol = sp.symbol
@@ -40,7 +41,9 @@ current_ratios = '''
     ON		s.symbol = concat(f.pair, 'T')
     JOIN 	future_price fp
     ON		f.symbol = fp.symbol
-    WHERE	f.symbol NOT LIKE (:perp_like)
+    JOIN    current_signal cs
+    ON      f.symbol = cs.symbol
+    WHERE	f.symbol NOT LIKE "%_PERP"
             AND	delivery_date > now()
     ORDER BY
             year_ratio DESC
@@ -74,8 +77,7 @@ current_operation_to_close = '''
             AND o.spot = cr.spot_symbol
     LEFT JOIN	current_ratios ocr
     ON		ocr.direct_ratio - o.direct_ratio > 0
-            AND ocr.year_ratio - o.year_ratio > 0
-    -- HAVING	direct_ratio_diff > 0.4
+            AND ocr.year_ratio - o.year_ratio > 0   
     '''
 
 create_view("current_operation_to_close", current_operation_to_close)

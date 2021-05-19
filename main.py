@@ -9,6 +9,7 @@ import model_service
 from binance_service import binance_client, get_spot_trade, get_spot_order, init_leverages, filter_future_list, get_price_element
 
 import position_service
+import binance_service
 
 from task_current_spot import task_current_spot
 from task_current_spot_price import task_current_spot_price
@@ -43,29 +44,43 @@ init_leverages()
 task_current_signal = Thread(name="task_current_signal", target=task_current_signal)
 task_current_signal.start()
 
+time.sleep(10)
+
+print("Start")
+
+# positions_to_open = model_service.get_current_ratios()
+#
+# while not len(positions_to_open):
+#     positions_to_open = model_service.get_current_ratios()
+#
 # best_position = [row for row in model_service.get_current_ratios()][0]
 #
-# print(best_position)
+# print("best_position", best_position)
 #
 # position_data = position_service.open_position(best_position)
 #
+# print("position_data", position_data)
+#
 # position_service.save_opened_position(position_data)
 
-
-# direct_ratio_diff = 0
+############################
 #
 # start = datetime.utcnow()
 #
-# while direct_ratio_diff < 0.25:
-#     position_to_close = [row for row in model_service.get_current_operations_to_close()][0]
+# positions_to_close = model_service.get_current_operations_to_close()
 #
-#     direct_ratio_diff = position_to_close['direct_ratio_diff']
+# while not len(positions_to_close):
+#     positions_to_close = model_service.get_current_operations_to_close()
 #
-#     print(direct_ratio_diff)
+# position_to_close = [row for row in model_service.get_current_operations_to_close()][0]
+#
+# direct_ratio_diff = position_to_close['direct_ratio_diff']
+#
+# print("position_to_close", position_to_close)
+#
+# print(direct_ratio_diff)
 #
 # print(datetime.now() - start)
-#
-# print(position_to_close)
 #
 # position_data = position_service.close_position(position_to_close)
 #
@@ -73,4 +88,3 @@ task_current_signal.start()
 #
 # position_service.save_closed_position(position_data)
 
-print("It Works!")

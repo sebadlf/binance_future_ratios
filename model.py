@@ -418,6 +418,7 @@ class CurrentRatios(Base):
     buy_per_contract = Column(Float)
     tick_size = Column(Float)
     base_asset = Column(String(20))
+    signal = Column(String(20))
 
 
 class CurrentOperationToClose(Base):
@@ -438,6 +439,7 @@ class CurrentOperationToClose(Base):
     buy_per_contract = Column(Float)
     tick_size = Column(Float)
     base_asset = Column(String(20))
+    signal = Column(String(20))
     contract_qty = Column(Integer)
     transfer_amount = Column(Float)
     future_base_qty = Column(Float)
@@ -452,6 +454,7 @@ class CurrentSignal(Base):
     symbol = Column(String(20), ForeignKey('future.symbol'), primary_key=True)
     time = Column(DATETIME)
     signal = Column(String(20))
+    avg_year_ratio = Column(Float)
 
 engine = create_engine(keys.DB_CONNECTION)
 
