@@ -18,18 +18,20 @@ from task_current_futures_price import task_current_futures_price
 from task_historical_spot import task_historical_spot
 from task_historical_futures import task_historical_futures
 from task_current_signal import task_current_signal
+from task_stock_bnb import task_stock_bnb
+from task_avg_ratio import task_avg_ratio
 
 task_current_futures = Thread(name="task_current_futures", target=task_current_futures)
-task_current_futures.start()
+# task_current_futures.start()
 
 task_current_spot = Thread(name="task_current_spot", target=task_current_spot)
-task_current_spot.start()
+# task_current_spot.start()
 
 task_current_spot_price = Thread(name="task_current_spot_price", target=task_current_spot_price)
-task_current_spot_price.start()
+# task_current_spot_price.start()
 
 task_current_futures_price = Thread(name="task_current_futures_price", target=task_current_futures_price)
-task_current_futures_price.start()
+# task_current_futures_price.start()
 
 task_historical_spot = Thread(name="task_historical_spot", target=task_historical_spot)
 task_historical_spot.start()
@@ -37,12 +39,18 @@ task_historical_spot.start()
 task_historical_futures = Thread(name="task_historical_futures", target=task_historical_futures)
 task_historical_futures.start()
 
+task_avg_ratio = Thread(name="task_avg_ratio", target=task_avg_ratio)
+task_avg_ratio.start()
+
 time.sleep(10)
 
-init_leverages()
+# init_leverages()
 
 task_current_signal = Thread(name="task_current_signal", target=task_current_signal)
 task_current_signal.start()
+
+task_stock_bnb = Thread(name="task_stock_bnb", target=task_stock_bnb)
+# task_stock_bnb.start()
 
 time.sleep(10)
 

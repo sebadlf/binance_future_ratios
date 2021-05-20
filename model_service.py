@@ -8,6 +8,8 @@ from typing import Dict
 import model
 import model_helper
 
+import pandas as pd
+
 import model_view
 
 spot_symbols_with_futures = [
@@ -439,6 +441,32 @@ def save_current_signal(symbol, data):
 
         save_current.time = datetime.utcnow()
         save_current.signal = data
+
+
+def get_data_ratio(ticker, k):
+
+    conn = model.engine
+
+    query = 'select avg(year_ratio) avg_year_ratio from ' \
+            '(select year_ratio from historical_ratios where ' \
+            f'future_symbol = "{ticker}" order by open_time desc limit 0, {k}) historical'
+
+    res = conn.execute(query).fetchone()[0]
+
+    return res
+
+def save_avg_ratio(symbol, data):
+    with Session(model.engine) as session, session.begin():
+
+        save_current = session.query(model.CurrentSignal).get(symbol)
+
+        if not save_current:
+            save_current = model.CurrentSignal(symbol=symbol)
+            session.add(save_current)
+
+        save_current.avg_year_ratio = data
+
+
 
 if __name__ == '__main__':
     pass

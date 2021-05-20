@@ -2,14 +2,14 @@ import matplotlib.pyplot as plt
 import utils
 
 ticker = 'DOTUSD_210625'
-k_sma = 20
-k_ema = 10
+k_sma = 5
+k_ema = 5
 
 data = utils.bring_data_db(ticker, 10000000, table = 'historical_ratios')
 print(data)
 data.drop(['future_symbol'], axis=1, inplace= True)
 
-data = data.loc[(data.index > '2021-05-17 23:59:59')]
+data = data.loc[(data.index > '2021-05-19 09:00:00') & (data.index < '2021-05-19 12:00:00')]
 
 print(data)
 
@@ -28,8 +28,8 @@ plt.grid(which= 'minor', axis= 'both', color= 'black', alpha= 0.15)
 
 # medias
 f1 = plt.plot(data['year_ratio'], c= 'k', ls= '-', lw= 1.5)
-# f2 = plt.plot(data['sma'], c= 'b', ls= 'solid', lw= 0.5)
-# f3 = plt.plot(data['ema'], c= 'r', ls= 'solid', lw= 0.5)
+f2 = plt.plot(data['sma'], c= 'b', ls= 'solid', lw= 0.5)
+f3 = plt.plot(data['ema'], c= 'r', ls= 'solid', lw= 0.5)
 plt.legend(['Ratio', 'SMA', 'EMA'], loc ='lower right')
 
 plt.show()
