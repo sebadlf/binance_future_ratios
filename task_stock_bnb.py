@@ -31,16 +31,19 @@ def signal_buy_bnb(ticker = 'BNBUSDT', min_bnb = 150, amount_buy = 20):
         return False
 
 def task_stock_bnb(quoteOrderQty = 20):
-    amount_buy = signal_buy_bnb()
-    if amount_buy:
-        try:
-            binance_client.order_market_buy(symbol = 'BNBUSDT', quoteOrderQty= quoteOrderQty)
-            print('Comprados 20 usdt en bnb')
 
-        except:
-            traceback.print_exc()
+    while app.running:
 
-    time.sleep(15)
+        amount_buy = signal_buy_bnb()
+        if amount_buy:
+            try:
+                binance_client.order_market_buy(symbol = 'BNBUSDT', quoteOrderQty= quoteOrderQty)
+                print('Comprados 20 usdt en bnb')
+
+            except:
+                traceback.print_exc()
+
+        time.sleep(15)
 
 
 if __name__ == '__main__':
