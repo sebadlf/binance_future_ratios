@@ -17,7 +17,7 @@ def amount_bnb(symbol = 'BNB'):
     return amount_bnb
 
 
-def signal_buy_bnb(ticker = 'BNBUSDT', min_bnb = 150, amount_buy = 20):
+def signal_buy_bnb(ticker = 'BNBUSDT', min_bnb = 5, amount_buy = 15):
     k_bnb = amount_bnb()
     price_bnb = float(binance_client.get_orderbook_ticker(symbol = ticker)['askPrice'])
 
@@ -30,7 +30,7 @@ def signal_buy_bnb(ticker = 'BNBUSDT', min_bnb = 150, amount_buy = 20):
     else:
         return False
 
-def task_stock_bnb(quoteOrderQty = 20):
+def task_stock_bnb(quoteOrderQty = 15):
 
     while app.running:
 
@@ -38,7 +38,7 @@ def task_stock_bnb(quoteOrderQty = 20):
         if amount_buy:
             try:
                 binance_client.order_market_buy(symbol = 'BNBUSDT', quoteOrderQty= quoteOrderQty)
-                print('Comprados 20 usdt en bnb')
+                print('Comprados 15 usdt en bnb')
 
             except:
                 traceback.print_exc()
