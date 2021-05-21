@@ -48,43 +48,62 @@ time.sleep(10)
 
 print("Start")
 
-# positions_to_open = model_service.get_current_ratios()
+positions_to_close = model_service.get_current_operations_to_close()
+
+while not len(positions_to_close):
+    positions_to_close = model_service.get_current_operations_to_close()
+
+position_to_close = [row for row in model_service.get_current_operations_to_close()][0]
+
+direct_ratio_diff = position_to_close['direct_ratio_diff']
+
+print("position_to_close", position_to_close)
+
+position_data = position_service.close_position(position_to_close)
+
+print(position_data)
+
+position_service.save_closed_position(position_data)
+
+# i = 0
 #
-# while not len(positions_to_open):
+# while i < 10:
+#
+#     i += 1
+#
+#     print(f"Posición {i}")
+#
 #     positions_to_open = model_service.get_current_ratios()
 #
-# best_position = [row for row in model_service.get_current_ratios()][0]
+#     while not len(positions_to_open):
+#         positions_to_open = model_service.get_current_ratios()
 #
-# print("best_position", best_position)
+#     best_position = [row for row in model_service.get_current_ratios()][0]
 #
-# position_data = position_service.open_position(best_position)
+#     print("best_position", best_position)
 #
-# print("position_data", position_data)
+#     position_data = position_service.open_position(best_position)
 #
-# position_service.save_opened_position(position_data)
-
-############################
+#     print("position_data", position_data)
 #
-# start = datetime.utcnow()
+#     position_service.save_opened_position(position_data)
 #
-# positions_to_close = model_service.get_current_operations_to_close()
+#     ###########################
 #
-# while not len(positions_to_close):
 #     positions_to_close = model_service.get_current_operations_to_close()
 #
-# position_to_close = [row for row in model_service.get_current_operations_to_close()][0]
+#     while not len(positions_to_close):
+#         positions_to_close = model_service.get_current_operations_to_close()
 #
-# direct_ratio_diff = position_to_close['direct_ratio_diff']
+#     position_to_close = [row for row in model_service.get_current_operations_to_close()][0]
 #
-# print("position_to_close", position_to_close)
+#     direct_ratio_diff = position_to_close['direct_ratio_diff']
 #
-# print(direct_ratio_diff)
+#     print("position_to_close", position_to_close)
 #
-# print(datetime.now() - start)
+#     position_data = position_service.close_position(position_to_close)
 #
-# position_data = position_service.close_position(position_to_close)
+#     print(position_data)
 #
-# print(position_data)
+#     position_service.save_closed_position(position_data)
 #
-# position_service.save_closed_position(position_data)
-

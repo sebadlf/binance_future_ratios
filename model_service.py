@@ -10,6 +10,8 @@ import model_helper
 
 import model_view
 
+import config
+
 spot_symbols_with_futures = [
     'ADAUSDT',
     'BCHUSDT',
@@ -59,7 +61,6 @@ def sync_spot_prices(spot_prices):
     with Session(model.engine) as session, session.begin():
         for spot_price in spot_prices:
             symbol = spot_price['symbol']
-            price = spot_price['price']
 
             if symbol in spot_symbols_with_futures:
                 spot_price_db = session.query(model.SpotPrice).get(symbol)
@@ -68,7 +69,10 @@ def sync_spot_prices(spot_prices):
                     spot_price_db = model.SpotPrice(symbol=symbol)
                     session.add(spot_price_db)
 
-                spot_price_db.price = price
+                spot_price_db.ask_price = spot_price['askPrice']
+                spot_price_db.ask_qty = spot_price['askQty']
+                spot_price_db.bid_price = spot_price['bidPrice']
+                spot_price_db.bid_qty = spot_price['bidQty']
 
 
 def sync_futures(futures):
@@ -107,28 +111,35 @@ def sync_futures_prices(futures_prices):
                 session.add(future_price_db)
 
             future_price_db.pair = future_price['pair']
-            future_price_db.mark_price = future_price['markPrice']
-            future_price_db.index_price = future_price['indexPrice']
-            future_price_db.estimated_settle_price = future_price['estimatedSettlePrice']
-            future_price_db.last_funding_rate = future_price['lastFundingRate'] if len(
-                future_price['lastFundingRate']) else None
-            future_price_db.interest_rate = future_price['lastFundingRate'] if len(
-                future_price['lastFundingRate']) else None
+            # future_price_db.mark_price = future_price['markPrice']
+            # future_price_db.index_price = future_price['indexPrice']
+            # future_price_db.estimated_settle_price = future_price['estimatedSettlePrice']
+            # future_price_db.last_funding_rate = future_price['lastFundingRate'] if len(
+            #     future_price['lastFundingRate']) else None
+            # future_price_db.interest_rate = future_price['lastFundingRate'] if len(
+            #     future_price['lastFundingRate']) else None
+            #
+            # future_price_db.next_funding_timestamp = future_price['nextFundingTime']
+            # future_price_db.next_funding_time = datetime.fromtimestamp(future_price['nextFundingTime'] / 1000)
+            #
+            # future_price_db.timestamp = future_price['time']
+            # future_price_db.time = datetime.fromtimestamp(future_price['time'] / 1000)
 
-            future_price_db.next_funding_timestamp = future_price['nextFundingTime']
-            future_price_db.next_funding_time = datetime.fromtimestamp(future_price['nextFundingTime'] / 1000)
-
-            future_price_db.timestamp = future_price['time']
-            future_price_db.time = datetime.fromtimestamp(future_price['time'] / 1000)
+            future_price_db.ask_price = future_price['askPrice']
+            future_price_db.ask_qty = future_price['askQty']
+            future_price_db.bid_price = future_price['bidPrice']
+            future_price_db.bid_qty = future_price['bidQty']
 
 
 def get_current_ratios():
     futures_info = []
 
+    # filter(model.CurrentRatios.signal == 'open').\
+
     with Session(model.engine) as session, session.begin():
         future_ratios = session.query(model.CurrentRatios).\
-            filter(model.CurrentRatios.signal == 'open').\
-            filter(model.CurrentRatios.year_ratio > 20).all()
+            filter(model.CurrentRatios.year_ratio > config.MIN_YEAR_MARGIN).\
+            all()
 
         for future_ratio in future_ratios:
 
@@ -155,10 +166,11 @@ def get_current_ratios():
 def get_current_operations_to_close():
     futures_info = []
 
+    # filter(model.CurrentOperationToClose.signal == 'close'). \
+
     with Session(model.engine) as session, session.begin():
         current_operation_to_close = session.query(model.CurrentOperationToClose).\
-            filter(model.CurrentOperationToClose.signal == 'close').\
-            filter(model.CurrentOperationToClose.direct_ratio_diff > 0.25).all()
+            filter(model.CurrentOperationToClose.direct_ratio_diff > 1).all()
 
         for operation_to_close in current_operation_to_close:
 

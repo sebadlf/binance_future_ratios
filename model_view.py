@@ -21,16 +21,16 @@ def create_view(name, query, **kwargs):
 
 current_ratios = '''
     SELECT 	f.symbol as future_symbol,
-            fp.mark_price as future_price,
+            fp.bid_price as future_price,
             s.symbol as spot_symbol,
-            sp.price as spot_price,
-            ((fp.mark_price / sp.price - 1) * 100) as direct_ratio,
+            sp.ask_price as spot_price,
+            ((fp.bid_price / sp.ask_price - 1) * 100) as direct_ratio,
             TIMESTAMPDIFF(HOUR, now(), f.delivery_date) + 1 as hours,
-            ((fp.mark_price / sp.price - 1) * 100) / (TIMESTAMPDIFF(HOUR, now(), f.delivery_date) + 1) as hour_ratio,
+            ((fp.bid_price / sp.ask_price - 1) * 100) / (TIMESTAMPDIFF(HOUR, now(), f.delivery_date) + 1) as hour_ratio,
             TIMESTAMPDIFF(DAY, now(), f.delivery_date) days,
-            ((fp.mark_price / sp.price - 1) * 100) / (TIMESTAMPDIFF(hour, now(), f.delivery_date) + 1)  * 24 * 365 as year_ratio,
+            ((fp.bid_price / sp.ask_price - 1) * 100) / (TIMESTAMPDIFF(hour, now(), f.delivery_date) + 1)  * 24 * 365 as year_ratio,
             f.contract_size,
-            f.contract_size / fp.mark_price as buy_per_contract,
+            f.contract_size / fp.bid_price as buy_per_contract,
             s.tick_size,
             s.base_asset,
             cs.signal
@@ -54,13 +54,29 @@ create_view("current_ratios", current_ratios, perp_like='%_PERP')
 current_operation_to_close = '''
     SELECT 	p.id as position_id,
             o.id as operation_id,
-            cr.*,
+            
+            o.direct_ratio - ((fp.ask_price / sp.bid_price - 1) * 100) as direct_ratio_diff,
+            o.year_ratio - ((fp.ask_price / sp.bid_price - 1) * 100) / (TIMESTAMPDIFF(hour, now(), f.delivery_date) + 1)  * 24 * 365 as year_ratio_diff,            
+            
+            f.symbol as future_symbol,
+            fp.ask_price as future_price,
+            s.symbol as spot_symbol,
+            sp.bid_price as spot_price,
+            ((fp.ask_price / sp.bid_price - 1) * 100) as direct_ratio,
+            TIMESTAMPDIFF(HOUR, now(), f.delivery_date) + 1 as hours,
+            ((fp.ask_price / sp.bid_price - 1) * 100) / (TIMESTAMPDIFF(HOUR, now(), f.delivery_date) + 1) as hour_ratio,
+            TIMESTAMPDIFF(DAY, now(), f.delivery_date) days,
+            ((fp.ask_price / sp.bid_price - 1) * 100) / (TIMESTAMPDIFF(hour, now(), f.delivery_date) + 1)  * 24 * 365 as year_ratio,
+            f.contract_size,
+            f.contract_size / fp.ask_price as buy_per_contract,
+            s.tick_size,
+            s.base_asset,
+            cs.signal,
+            
             p.contract_qty, 		
             t.amount as transfer_amount,
             ft.base_qty as future_base_qty,
-            ft.commission as future_commission,            
-            o.direct_ratio - cr.direct_ratio as direct_ratio_diff,
-            o.year_ratio - cr.year_ratio as year_ratio_diff,
+            ft.commission as future_commission,
             ocr.future_symbol as better_future_symbol
     FROM	position p	
     JOIN 	operation o
@@ -72,9 +88,16 @@ current_operation_to_close = '''
     ON		o.id = fo.operation_id
     JOIN	future_trade ft
     ON		fo.id = ft.future_order_id
-    JOIN	current_ratios cr
-    ON		o.future = cr.future_symbol
-            AND o.spot = cr.spot_symbol
+    JOIN	future f
+    ON		fo.symbol = f.symbol
+   	JOIN 	future_price fp
+   	ON		f.symbol = fp.symbol    
+   	JOIN 	spot s
+   	ON		o.spot = s.symbol
+   	JOIN 	spot_price sp
+   	ON		s.symbol = sp.symbol
+	JOIN	current_signal cs
+	ON		f.symbol = cs.symbol
     LEFT JOIN	current_ratios ocr
     ON		ocr.direct_ratio - o.direct_ratio > 0
             AND ocr.year_ratio - o.year_ratio > 0   

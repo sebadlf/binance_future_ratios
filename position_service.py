@@ -6,7 +6,7 @@ import traceback
 import json
 
 MIN_NUMBER_OF_CONTRACTS = 2
-SPOT_BUY_OVERBUY_MARGIN = 1.01
+SPOT_BUY_OVERBUY_MARGIN = 1.02
 OPEN_POSITION_TRANSFER_TYPE = 'MAIN_CMFUTURE'
 CLOSE_POSITION_TRANSFER_TYPE = 'CMFUTURE_MAIN'
 
@@ -158,20 +158,21 @@ def close_position(position_dict: Dict):
         contract_qty = position_dict['contract_qty']
         transfer_amount = position_dict['transfer_amount']
 
+        sell_future_base_qty = position_dict['future_base_qty']
+        sell_future_commission = position_dict['future_commission']
+
         future_order = binance_client.futures_coin_create_order(symbol=future_symbol, side="BUY", type="MARKET", quantity=contract_qty)
-        # future_order = data['future_order']
 
         future_order_id = future_order['orderId']
 
         future_trade = binance_service.get_future_trade(future_symbol, future_order_id, contract_qty)
-        # future_trade = data['future_trade']
 
-        realized_pnl_sum = sum([float(ft['realizedPnl']) for ft in future_trade])
+        buy_future_base_qty = sum([float(ft['baseQty']) for ft in future_trade])
+        buy_future_commission = sum([float(ft['commission']) for ft in future_trade])
 
-        quantity_to_sell = transfer_amount + realized_pnl_sum
-
+        quantity_to_sell = transfer_amount - sell_future_base_qty - sell_future_commission + buy_future_base_qty - buy_future_commission
         quantity_to_sell = utils.get_quantity_rounded(quantity_to_sell, tick_size)
-        #
+
         transfer = binance_client.universal_transfer(type=CLOSE_POSITION_TRANSFER_TYPE, asset=base_asset, amount=quantity_to_sell)
 
         spot_order = binance_client.order_market_sell(symbol=spot_symbol, quantity=quantity_to_sell)
@@ -251,7 +252,7 @@ def save_closed_position(data_dict: Dict):
         model_service.save_transfer({
             'operation_id': operation_id,
             **transfer,
-            'type': OPEN_POSITION_TRANSFER_TYPE,
+            'type': CLOSE_POSITION_TRANSFER_TYPE,
             'asset': base_asset,
             'amount': orig_qty
 

@@ -117,34 +117,11 @@ def init_leverages():
 # {'symbol': 'ADAUSDT', 'orderId': 1442982166, 'orderListId': -1, 'clientOrderId': 'KsDTxPbIIJmjzJ2lTvXaYp', 'price': '0.00000000', 'origQty': '30.00000000', 'executedQty': '30.00000000', 'cummulativeQuoteQty': '48.87900000', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'stopPrice': '0.00000000', 'icebergQty': '0.00000000', 'time': 1620680129133, 'updateTime': 1620680129133, 'isWorking': True, 'origQuoteOrderQty': '0.00000000'}
 
 if __name__ == '__main__':
-    operation_id = 1
+    from datetime import datetime
 
-    # sell_future_order = {'orderId': 491025013, 'symbol': 'DOTUSD_210625', 'pair': 'DOTUSD', 'status': 'NEW',
-    #  'clientOrderId': 'eRiA2hiJIUoWv6fWfhBxDa', 'price': '0', 'avgPrice': '0.000', 'origQty': '2', 'executedQty': '0',
-    #  'cumQty': '0', 'cumBase': '0', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False,
-    #  'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False,
-    #  'origType': 'MARKET', 'updateTime': 1621043766723}
-    #
-    # sell_future_order_id = model_service.save_future_order({
-    #     'operation_id': operation_id,
-    #     **sell_future_order
-    # })
+    start = datetime.utcnow()
 
-    sell_future_order_id = 1
+    print(binance_client.get_order_book(symbol="DOTUSDT", limit=5))
+    print(binance_client.get_orderbook_tickers())
 
-    sell_future_order_update = get_future_order("DOTUSD_210625", "491025013")
-
-    sell_future_order_id = model_service.save_future_order({
-        'future_order_id': sell_future_order_id,
-        'operation_id': operation_id,
-        **sell_future_order_update
-    })
-
-    sell_future_trade = get_future_trade("DOTUSD_210625", "491025013")
-
-    sell_future_trade_id = model_service.save_future_trade({
-        'future_order_id': sell_future_order_id,
-        **sell_future_trade
-    })
-
-    print(sell_future_trade)
+    print(datetime.utcnow() - start)

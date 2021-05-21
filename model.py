@@ -62,7 +62,12 @@ class SpotPrice(Base):
     __tablename__ = 'spot_price'
 
     symbol = Column(String(20), ForeignKey('spot.symbol'), primary_key=True)
-    price = Column(Float)
+    # price = Column(Float)
+
+    ask_price = Column(Float)
+    ask_qty = Column(Float)
+    bid_price = Column(Float)
+    bid_qty = Column(Float)
 
     spot = relationship("Spot", back_populates="spot_price")
 
@@ -91,17 +96,22 @@ class FuturePrice(Base):
         viewonly=True,
     )
 
-    mark_price = Column(Float)
-    index_price = Column(Float)
-    estimated_settle_price = Column(Float)
-    last_funding_rate = Column(Float)
-    interest_rate = Column(Float)
+    ask_price = Column(Float)
+    ask_qty = Column(Float)
+    bid_price = Column(Float)
+    bid_qty = Column(Float)
 
-    next_funding_timestamp = Column(BigInteger)
-    next_funding_time = Column(DATETIME)
+    # mark_price = Column(Float)
+    # index_price = Column(Float)
+    # estimated_settle_price = Column(Float)
+    # last_funding_rate = Column(Float)
+    # interest_rate = Column(Float)
+    #
+    # next_funding_timestamp = Column(BigInteger)
+    # next_funding_time = Column(DATETIME)
 
-    timestamp = Column(BigInteger)
-    time = Column(DATETIME)
+    # timestamp = Column(BigInteger)
+    # time = Column(DATETIME)
 
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
