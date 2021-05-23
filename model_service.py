@@ -62,7 +62,7 @@ def sync_spot(spot_list):
 def sync_spot_prices(spot_prices):
     with Session(model.engine) as session, session.begin():
         for spot_price in spot_prices:
-            symbol = spot_price['symbol']
+            symbol = spot_price['s']
 
             if symbol in spot_symbols_with_futures:
                 spot_price_db = session.query(model.SpotPrice).get(symbol)
@@ -71,10 +71,10 @@ def sync_spot_prices(spot_prices):
                     spot_price_db = model.SpotPrice(symbol=symbol)
                     session.add(spot_price_db)
 
-                spot_price_db.ask_price = spot_price['askPrice']
-                spot_price_db.ask_qty = spot_price['askQty']
-                spot_price_db.bid_price = spot_price['bidPrice']
-                spot_price_db.bid_qty = spot_price['bidQty']
+                spot_price_db.ask_price = spot_price['a']
+                spot_price_db.ask_qty = spot_price['A']
+                spot_price_db.bid_price = spot_price['b']
+                spot_price_db.bid_qty = spot_price['B']
 
 
 def sync_futures(futures):
@@ -104,7 +104,7 @@ def sync_futures(futures):
 def sync_futures_prices(futures_prices):
     with Session(model.engine) as session, session.begin():
         for future_price in futures_prices:
-            symbol = future_price['symbol']
+            symbol = future_price['s']
 
             future_price_db = session.query(model.FuturePrice).get(symbol)
 
@@ -112,7 +112,7 @@ def sync_futures_prices(futures_prices):
                 future_price_db = model.FuturePrice(symbol=symbol)
                 session.add(future_price_db)
 
-            future_price_db.pair = future_price['pair']
+            future_price_db.pair = future_price['ps']
             # future_price_db.mark_price = future_price['markPrice']
             # future_price_db.index_price = future_price['indexPrice']
             # future_price_db.estimated_settle_price = future_price['estimatedSettlePrice']
@@ -127,10 +127,10 @@ def sync_futures_prices(futures_prices):
             # future_price_db.timestamp = future_price['time']
             # future_price_db.time = datetime.fromtimestamp(future_price['time'] / 1000)
 
-            future_price_db.ask_price = future_price['askPrice']
-            future_price_db.ask_qty = future_price['askQty']
-            future_price_db.bid_price = future_price['bidPrice']
-            future_price_db.bid_qty = future_price['bidQty']
+            future_price_db.ask_price = future_price['a']
+            future_price_db.ask_qty = future_price['A']
+            future_price_db.bid_price = future_price['b']
+            future_price_db.bid_qty = future_price['B']
 
 
 def get_current_ratios():

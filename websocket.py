@@ -13,7 +13,7 @@ def main():
     twm.start()
 
     def handle_socket_message(msg):
-        print(f"message type: {msg['e']}")
+        # print(f"message type: {msg['e']}")
         print(msg)
 
     # twm.start_kline_socket(callback=handle_socket_message, symbol="BTCUSD_200626")
@@ -21,8 +21,7 @@ def main():
     # # multiple sockets can be started
     # twm.start_depth_socket(callback=handle_socket_message, symbol="BTCUSD_200626")
 
-
-    twm.start_symbol_ticker_futures_socket(callback=handle_socket_message, symbol="BTCUSD_200626", futures_type=FuturesType.COIN_M)
+    twm.start_symbol_ticker_futures_socket(callback=handle_socket_message, symbol="ADAUSD_210924", futures_type=FuturesType.COIN_M)
 
     # or a multiplex socket can be started like this
     # see Binance docs for stream names
