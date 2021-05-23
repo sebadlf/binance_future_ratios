@@ -13,3 +13,5 @@ def task_current_futures_price():
             sync_futures_prices(futures_prices)
         except Exception as ex:
             pass
+
+        time.sleep(0.05)

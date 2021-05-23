@@ -13,3 +13,5 @@ def task_current_spot_price():
             sync_spot_prices(spot_prices)
         except Exception as ex:
             pass
+
+        time.sleep(0.05)
