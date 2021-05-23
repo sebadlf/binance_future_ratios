@@ -7,6 +7,7 @@ import config
 
 
 def task_current_signal(sma = config.SMA, ema = config.EMA, table = 'historical_ratios'):
+    time.sleep(30)
 
     tickers = utils.currencies()
     tickers = tickers[0]
