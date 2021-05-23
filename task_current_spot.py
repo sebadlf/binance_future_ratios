@@ -6,7 +6,10 @@ from model_service import sync_spot
 
 def task_current_spot():
     while app.running:
-        spot = binance_client.get_exchange_info()
-        sync_spot(spot['symbols'])
+        try:
+            spot = binance_client.get_exchange_info()
+            sync_spot(spot['symbols'])
+        except Exception as ex:
+            pass
 
         time.sleep(60)

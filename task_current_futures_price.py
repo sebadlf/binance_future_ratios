@@ -8,5 +8,8 @@ def task_current_futures_price():
     time.sleep(5)
 
     while app.running:
-        futures_prices = binance_client.futures_coin_orderbook_ticker()
-        sync_futures_prices(futures_prices)
+        try:
+            futures_prices = binance_client.futures_coin_orderbook_ticker()
+            sync_futures_prices(futures_prices)
+        except Exception as ex:
+            pass

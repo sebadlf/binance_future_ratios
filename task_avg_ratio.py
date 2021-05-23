@@ -6,22 +6,24 @@ import keys
 import utils
 import traceback
 
-def task_avg_ratio(k = 10080):
+def task_avg_ratio(field, quantity, sleep_time):
 
     tickers = utils.currencies()
     tickers = tickers[0]
 
-    i = False
+    for ticker in tickers:
+        avg = model_service.get_data_ratio(ticker=ticker, quantity=quantity)
+        model_service.save_avg_ratio(ticker, field, avg)
 
     while app.running:
         for ticker in tickers:
-            avg = model_service.get_data_ratio(ticker = ticker, k = k)
-            model_service.save_avg_ratio(ticker, avg)
+            try:
+                avg = model_service.get_data_ratio(ticker=ticker, quantity=quantity)
+                model_service.save_avg_ratio(ticker, field, avg)
+            except:
+                pass
 
-            if i:
-                time.sleep(3600)
-
-        i = True
+            time.sleep(sleep_time / len(tickers))
 
 if __name__ == '__main__':
-    task_avg_ratio()
+    pass

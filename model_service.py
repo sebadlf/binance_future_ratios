@@ -136,11 +136,17 @@ def sync_futures_prices(futures_prices):
 def get_current_ratios():
     futures_info = []
 
-    # filter(model.CurrentRatios.signal == 'open').\
+    #             filter(model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio).\
 
     with Session(model.engine) as session, session.begin():
-        future_ratios = session.query(model.CurrentRatios).\
+        future_ratios = session.query(model.CurrentRatios).join(model.CurrentRatios.current_signal).\
             filter(model.CurrentRatios.year_ratio > config.MIN_YEAR_MARGIN).\
+            filter(model.CurrentRatios.spot_symbol != "BTCUSDT").\
+            filter(model.CurrentSignal.six_hours_avg_year_ratio > model.CurrentSignal.daily_avg_year_ratio). \
+            filter(model.CurrentSignal.six_hours_avg_year_ratio > model.CurrentSignal.daily_avg_year_ratio). \
+            filter(model.CurrentSignal.hourly_avg_year_ratio > model.CurrentSignal.six_hours_avg_year_ratio).\
+            filter(model.CurrentSignal.ten_minutes_avg_year_ratio > model.CurrentSignal.hourly_avg_year_ratio). \
+            filter(model.CurrentRatios.signal == 'open').\
             all()
 
         for future_ratio in future_ratios:
@@ -168,10 +174,10 @@ def get_current_ratios():
 def get_current_operations_to_close():
     futures_info = []
 
-    # filter(model.CurrentOperationToClose.signal == 'close'). \
 
     with Session(model.engine) as session, session.begin():
-        current_operation_to_close = session.query(model.CurrentOperationToClose).\
+        current_operation_to_close = session.query(model.CurrentOperationToClose). \
+            filter(model.CurrentOperationToClose.signal == 'close').\
             filter(model.CurrentOperationToClose.direct_ratio_diff > 1).all()
 
         for operation_to_close in current_operation_to_close:
@@ -455,30 +461,28 @@ def save_current_signal(symbol, data):
         save_current.signal = data
 
 
-def get_data_ratio(ticker, k):
+def get_data_ratio(ticker, quantity):
 
     conn = model.engine
 
     query = 'select avg(year_ratio) avg_year_ratio from ' \
             '(select year_ratio from historical_ratios where ' \
-            f'future_symbol = "{ticker}" order by open_time desc limit 0, {k}) historical'
+            f'future_symbol = "{ticker}" order by open_time desc limit 0, {quantity}) historical'
 
     res = conn.execute(query).fetchone()[0]
 
     return res
 
-def save_avg_ratio(symbol, data):
+def save_avg_ratio(symbol, attribute, ratio):
     with Session(model.engine) as session, session.begin():
 
-        save_current = session.query(model.CurrentSignal).get(symbol)
+        current_signal = session.query(model.CurrentSignal).get(symbol)
 
-        if not save_current:
-            save_current = model.CurrentSignal(symbol=symbol)
-            session.add(save_current)
+        if not current_signal:
+            current_signal = model.CurrentSignal(symbol=symbol)
+            session.add(current_signal)
 
-        save_current.avg_year_ratio = data
-
-
+        setattr(current_signal, attribute, ratio)
 
 if __name__ == '__main__':
-    pass
+    print(get_current_ratios())

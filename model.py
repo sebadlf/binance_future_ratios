@@ -412,25 +412,6 @@ class FutureTrade(Base):
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-class CurrentRatios(Base):
-    __tablename__ = 'current_ratios'
-
-    future_symbol = Column(String(20), primary_key=True)
-    future_price = Column(Float)
-    spot_symbol = Column(String(20), primary_key=True)
-    spot_price = Column(Float)
-    direct_ratio = Column(Float)
-    hours = Column(Integer)
-    hour_ratio = Column(Float)
-    days = Column(Integer)
-    year_ratio = Column(Float)
-    contract_size = Column(Integer)
-    buy_per_contract = Column(Float)
-    tick_size = Column(Float)
-    base_asset = Column(String(20))
-    signal = Column(String(20))
-
-
 class CurrentOperationToClose(Base):
     __tablename__ = 'current_operation_to_close'
 
@@ -464,7 +445,38 @@ class CurrentSignal(Base):
     symbol = Column(String(20), ForeignKey('future.symbol'), primary_key=True)
     time = Column(DATETIME)
     signal = Column(String(20))
-    avg_year_ratio = Column(Float)
+
+    weekly_avg_year_ratio = Column(Float)
+    daily_avg_year_ratio = Column(Float)
+    six_hours_avg_year_ratio = Column(Float)
+    hourly_avg_year_ratio = Column(Float)
+    ten_minutes_avg_year_ratio = Column(Float)
+
+class CurrentRatios(Base):
+    __tablename__ = 'current_ratios'
+
+    future_symbol = Column(String(20), primary_key=True)
+    future_price = Column(Float)
+    spot_symbol = Column(String(20), primary_key=True)
+    spot_price = Column(Float)
+    direct_ratio = Column(Float)
+    hours = Column(Integer)
+    hour_ratio = Column(Float)
+    days = Column(Integer)
+    year_ratio = Column(Float)
+    contract_size = Column(Integer)
+    buy_per_contract = Column(Float)
+    tick_size = Column(Float)
+    base_asset = Column(String(20))
+    signal = Column(String(20))
+
+    current_signal = relationship(
+        "CurrentSignal",
+        primaryjoin=future_symbol == foreign(CurrentSignal.symbol),
+        uselist=False,
+        viewonly=True,
+    )
+
 
 engine = create_engine(keys.DB_CONNECTION)
 

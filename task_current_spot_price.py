@@ -8,5 +8,8 @@ def task_current_spot_price():
     time.sleep(5)
 
     while app.running:
-        spot_prices = binance_client.get_orderbook_tickers()
-        sync_spot_prices(spot_prices)
+        try:
+            spot_prices = binance_client.get_orderbook_tickers()
+            sync_spot_prices(spot_prices)
+        except Exception as ex:
+            pass
