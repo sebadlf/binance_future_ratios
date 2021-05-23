@@ -23,17 +23,17 @@ def task_current_futures_price():
 
         cache[symbol] = data
 
-    for future_symbol in get_current_futures():
-        twm.start_symbol_ticker_futures_socket(callback=handle_socket_message, symbol=future_symbol,
-                                               futures_type=FuturesType.COIN_M)
+    streams = [f"{symbol.lower()}@bookTicker" for symbol in get_current_futures()]
+
+    twm.start_futures_multiplex_socket(callback=handle_socket_message, streams=streams, futures_type=FuturesType.COIN_M)
 
     while app.running:
         try:
             to_save = []
 
             while len(cache):
-                key, msg = cache.popitem()
-                to_save.append(msg)
+                item_key, item_value = cache.popitem()
+                to_save.append(item_value)
 
             if len(to_save):
                 sync_futures_prices(to_save)
