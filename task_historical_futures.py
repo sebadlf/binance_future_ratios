@@ -94,6 +94,9 @@ def task_historical_futures(start_time = '2021-04-01 00:00:00'):
             except:
                 traceback.print_exc()
                 pass
+
+            time.sleep(5)
+
         # print('Futures terminado, esperando 30 segundos')
         time.sleep(30)
 
