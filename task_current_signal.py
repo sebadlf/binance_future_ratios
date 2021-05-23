@@ -18,13 +18,14 @@ def task_current_signal(sma = config.SMA, ema = config.EMA, table = 'historical_
                 sma_value = utils.sma(ticker = ticker, k = sma, table= table)
                 ema_value = utils.ema(ticker = ticker, k = ema, table= table)
 
-                if ema_value <= sma_value:
-                    resultado = 'open'
+                if ema_value and sma_value:
+                    if ema_value <= sma_value:
+                        resultado = 'open'
 
-                else:
-                    resultado = 'close'
+                    else:
+                        resultado = 'close'
 
-                save_current_signal(ticker, resultado)
+                    save_current_signal(ticker, resultado)
 
             except:
                 traceback.print_exc()
