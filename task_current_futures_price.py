@@ -1,4 +1,4 @@
-from binance.streams import ThreadedWebsocketManager, FuturesType
+from streams import ThreadedWebsocketManager, FuturesType
 from binance_service import binance_client
 
 import keys
