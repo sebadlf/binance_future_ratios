@@ -1,4 +1,5 @@
 from binance_service import binance_client
+
 import time
 
 import app
