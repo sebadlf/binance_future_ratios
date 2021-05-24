@@ -1,7 +1,6 @@
 from sqlalchemy.sql import text
 from model import engine
 
-
 def create_view(name, query, **kwargs):
     stm_delete = f"""
     DROP VIEW IF EXISTS {name}

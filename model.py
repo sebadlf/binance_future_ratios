@@ -484,4 +484,5 @@ view_tables = ['current_ratios', 'current_operation_to_close']
 
 real_tables = [table_value for (table_key, table_value) in Base.metadata.tables.items() if table_key not in view_tables]
 
-Base.metadata.create_all(engine, tables=real_tables)
+def create_tables():
+    Base.metadata.create_all(engine, tables=real_tables)

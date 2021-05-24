@@ -10,8 +10,6 @@ import model_helper
 
 import pandas as pd
 
-import model_view
-
 import config
 
 spot_symbols_with_futures = [
