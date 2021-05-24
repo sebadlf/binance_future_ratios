@@ -1,10 +1,7 @@
-from binance_service import binance_client
 import time
 import app
 import model_service
-import keys
 import utils
-import traceback
 
 def task_avg_ratio(field, quantity, sleep_time):
 

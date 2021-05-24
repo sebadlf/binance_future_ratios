@@ -1,5 +1,4 @@
-from binance.streams import ThreadedWebsocketManager, FuturesType
-from binance_service import binance_client
+from binance.streams import ThreadedWebsocketManager
 
 import traceback
 

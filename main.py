@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from threading import Thread
 from multiprocessing import Process
 
@@ -6,7 +5,7 @@ import time
 
 import model
 
-import model_view
+# import model_view
 
 import model_service
 

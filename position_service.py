@@ -1,5 +1,5 @@
 from typing import Dict
-from binance_service import binance_client
+# from binance_service import binance_client
 import binance_service
 import model_service
 import traceback
@@ -11,6 +11,11 @@ OPEN_POSITION_TRANSFER_TYPE = 'MAIN_CMFUTURE'
 CLOSE_POSITION_TRANSFER_TYPE = 'CMFUTURE_MAIN'
 
 import utils
+
+import keys
+from binance.client import Client
+
+binance_client_position_service = Client(keys.api_key, keys.api_secret)
 
 def open_position(position_dict: Dict):
     spot_order = None
