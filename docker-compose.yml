@@ -15,6 +15,7 @@ services:
             - 3306:3306
     app:
         build: .
+        platform: linux/x86_64
         restart: always
         networks:
             - backend-network
