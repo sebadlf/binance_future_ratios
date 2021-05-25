@@ -1,5 +1,5 @@
 from typing import Dict
-# from binance_service import binance_client
+from binance_service import binance_client
 import binance_service
 import model_service
 import traceback
