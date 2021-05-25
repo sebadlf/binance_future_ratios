@@ -25,6 +25,7 @@ from task_stock_bnb import task_stock_bnb, amount_ticker
 from task_avg_ratio import task_avg_ratio
 
 
+
 if __name__ == '__main__':
     model.create_tables()
 

@@ -12,6 +12,8 @@ import pandas as pd
 
 import config
 
+engine = model.get_engine()
+
 spot_symbols_with_futures = [
     'ADAUSDT',
     'BCHUSDT',
