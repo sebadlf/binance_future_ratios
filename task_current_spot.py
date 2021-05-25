@@ -16,6 +16,7 @@ def task_current_spot():
             spot = binance_client.get_exchange_info()
             sync_spot(engine, spot['symbols'])
         except Exception as ex:
+            print(ex)
             pass
 
         time.sleep(60)

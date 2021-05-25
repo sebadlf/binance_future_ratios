@@ -91,7 +91,6 @@ def getHistorical(symbol, startTime, endTime = None, quote_currency='USDT', inte
 def task_historical_spot(start_time = '2021-04-01 00:00:00'):
     engine.dispose()
 
-
     time.sleep(10)
 
     tickers = utils.currencies()

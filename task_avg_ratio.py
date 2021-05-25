@@ -1,22 +1,21 @@
 import time
 import app
 import model_service
-import utils
+import model
 
-def task_avg_ratio(field, quantity, sleep_time):
-
-    tickers = utils.currencies()
-    tickers = tickers[0]
+def task_avg_ratio(tickers, field, quantity, sleep_time):
+    engine = model.get_engine()
+    engine.dispose()
 
     for ticker in tickers:
-        avg = model_service.get_data_ratio(ticker=ticker, quantity=quantity)
-        model_service.save_avg_ratio(ticker, field, avg)
+        avg = model_service.get_data_ratio(engine, ticker=ticker, quantity=quantity)
+        model_service.save_avg_ratio(engine, ticker, field, avg)
 
     while app.running:
         for ticker in tickers:
             try:
-                avg = model_service.get_data_ratio(ticker=ticker, quantity=quantity)
-                model_service.save_avg_ratio(ticker, field, avg)
+                avg = model_service.get_data_ratio(engine, ticker=ticker, quantity=quantity)
+                model_service.save_avg_ratio(engine, ticker, field, avg)
             except:
                 pass
 

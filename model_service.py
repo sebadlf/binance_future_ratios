@@ -461,7 +461,7 @@ def save_current_signal(symbol, data):
         save_current.signal = data
 
 
-def get_data_ratio(ticker, quantity):
+def get_data_ratio(engine, ticker, quantity):
 
     conn = engine
 
@@ -473,7 +473,7 @@ def get_data_ratio(ticker, quantity):
 
     return res
 
-def save_avg_ratio(symbol, attribute, ratio):
+def save_avg_ratio(engine, symbol, attribute, ratio):
     with Session(engine) as session, session.begin():
 
         current_signal = session.query(model.CurrentSignal).get(symbol)
