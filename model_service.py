@@ -142,7 +142,7 @@ def get_current_ratios():
         future_ratios = session.query(model.CurrentRatios).join(model.CurrentRatios.current_signal).\
             filter(model.CurrentRatios.year_ratio > config.MIN_YEAR_MARGIN).\
             filter(model.CurrentRatios.spot_symbol != "BTCUSDT").\
-            filter(model.CurrentSignal.six_hours_avg_year_ratio > model.CurrentSignal.daily_avg_year_ratio). \
+            filter(model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio). \
             filter(model.CurrentSignal.six_hours_avg_year_ratio > model.CurrentSignal.daily_avg_year_ratio). \
             filter(model.CurrentSignal.hourly_avg_year_ratio > model.CurrentSignal.six_hours_avg_year_ratio).\
             filter(model.CurrentSignal.ten_minutes_avg_year_ratio > model.CurrentSignal.hourly_avg_year_ratio). \
