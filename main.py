@@ -70,7 +70,7 @@ if __name__ == '__main__':
     task_avg_ratio5 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'ten_minutes_avg_year_ratio', 10))
     task_avg_ratio5.start()
 
-    task_current_signal = Process(name="task_current_signal", target=task_current_signal, args=(tickers, ))
+    task_current_signal = Thread(name="task_current_signal", target=task_current_signal, args=(tickers, ))
     task_current_signal.start()
 
     task_stock_bnb = Thread(name="task_stock_bnb", target=task_stock_bnb)
