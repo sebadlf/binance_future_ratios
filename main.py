@@ -53,19 +53,19 @@ if __name__ == '__main__':
     tickers = utils.currencies()
     tickers = tickers[0]
 
-    task_avg_ratio1 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'weekly_avg_year_ratio', 10080, 10080))
+    task_avg_ratio1 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'weekly_avg_year_ratio', 10080))
     task_avg_ratio1.start()
 
-    task_avg_ratio2 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'daily_avg_year_ratio', 1440, 1440))
+    task_avg_ratio2 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'daily_avg_year_ratio', 1440))
     task_avg_ratio2.start()
 
-    task_avg_ratio3 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'six_hours_avg_year_ratio', 360, 360))
+    task_avg_ratio3 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'six_hours_avg_year_ratio', 360))
     task_avg_ratio3.start()
 
-    task_avg_ratio4 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'hourly_avg_year_ratio', 60, 60))
+    task_avg_ratio4 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'hourly_avg_year_ratio', 60))
     task_avg_ratio4.start()
 
-    task_avg_ratio5 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'ten_minutes_avg_year_ratio', 10, 10))
+    task_avg_ratio5 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'ten_minutes_avg_year_ratio', 10))
     task_avg_ratio5.start()
     #
     # time.sleep(10)

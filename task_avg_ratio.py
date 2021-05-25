@@ -3,9 +3,11 @@ import app
 import model_service
 import model
 
-def task_avg_ratio(tickers, field, quantity, sleep_time):
+def task_avg_ratio(tickers, field, quantity):
     engine = model.get_engine()
     engine.dispose()
+
+    sleep_time = quantity / 10 * 60 / len(tickers)
 
     for ticker in tickers:
         print("get_data_ratio", field, "start")
@@ -24,7 +26,7 @@ def task_avg_ratio(tickers, field, quantity, sleep_time):
                 print(field)
                 print(ex)
 
-            time.sleep(sleep_time / len(tickers))
+            time.sleep(sleep_time)
 
 if __name__ == '__main__':
     pass
