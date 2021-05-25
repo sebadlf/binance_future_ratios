@@ -12,6 +12,8 @@ import pandas as pd
 
 import config
 
+engine = model.get_engine()
+
 spot_symbols_with_futures = [
     'ADAUSDT',
     'BCHUSDT',
@@ -26,7 +28,7 @@ spot_symbols_with_futures = [
 
 
 def get_current_futures():
-    with Session(model.engine) as session, session.begin():
+    with Session(engine) as session, session.begin():
         futures = session.query(model.Future.symbol).filter(model.Future.symbol.notlike('%_PERP')).all()
 
         symbols = [future[0] for future in futures]
@@ -34,8 +36,8 @@ def get_current_futures():
         return symbols
 
 
-def sync_spot(spot_list):
-    with Session(model.engine) as session, session.begin():
+def sync_spot(engine, spot_list):
+    with Session(engine) as session, session.begin():
         for spot in spot_list:
             symbol = spot['symbol']
 
@@ -57,8 +59,8 @@ def sync_spot(spot_list):
                 spot_db.tick_size = lot_filter['stepSize']
 
 
-def sync_spot_prices(spot_prices):
-    with Session(model.engine) as session, session.begin():
+def sync_spot_prices(engine, spot_prices):
+    with Session(engine) as session, session.begin():
         for spot_price in spot_prices:
             symbol = spot_price['s']
 
@@ -75,8 +77,8 @@ def sync_spot_prices(spot_prices):
                 spot_price_db.bid_qty = spot_price['B']
 
 
-def sync_futures(futures):
-    with Session(model.engine) as session, session.begin():
+def sync_futures(engine, futures):
+    with Session(engine) as session, session.begin():
         for future in futures:
             symbol = future['symbol']
 
@@ -99,8 +101,8 @@ def sync_futures(futures):
             future_db.contract_size = future['contractSize']
 
 
-def sync_futures_prices(futures_prices):
-    with Session(model.engine) as session, session.begin():
+def sync_futures_prices(engine, futures_prices):
+    with Session(engine) as session, session.begin():
         for future_price in futures_prices:
             symbol = future_price['s']
 
@@ -136,7 +138,7 @@ def get_current_ratios():
 
     #             filter(model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio).\
 
-    with Session(model.engine) as session, session.begin():
+    with Session(engine) as session, session.begin():
         future_ratios = session.query(model.CurrentRatios).join(model.CurrentRatios.current_signal).\
             filter(model.CurrentRatios.year_ratio > config.MIN_YEAR_MARGIN).\
             filter(model.CurrentRatios.spot_symbol != "BTCUSDT").\
@@ -173,7 +175,7 @@ def get_current_operations_to_close():
     futures_info = []
 
 
-    with Session(model.engine) as session, session.begin():
+    with Session(engine) as session, session.begin():
         current_operation_to_close = session.query(model.CurrentOperationToClose). \
             filter(model.CurrentOperationToClose.signal == 'close').\
             filter(model.CurrentOperationToClose.direct_ratio_diff > 1).all()
@@ -212,7 +214,7 @@ def get_current_operations_to_close():
         return futures_info
 
 def save_historical_data_spot(symbol, historical_data):
-    with Session(model.engine) as session, session.begin():
+    with Session(engine) as session, session.begin():
         for hour_data in historical_data:
             market_data = model.SpotHistorical(symbol=symbol)
             session.add(market_data)
@@ -232,7 +234,7 @@ def save_historical_data_spot(symbol, historical_data):
 
 
 def save_historical_data_futures(symbol, historical_data):
-    with Session(model.engine) as session, session.begin():
+    with Session(engine) as session, session.begin():
         for hour_data in historical_data:
             market_data = model.FuturesHistorical(symbol=symbol)
             session.add(market_data)
@@ -255,7 +257,7 @@ def create_position(position_dict: Dict) -> model.Position:
     position_id = None
 
     try:
-        with Session(model.engine) as session:
+        with Session(engine) as session:
             with session.begin():
                 position = model_helper.sync_position(position_dict)
                 session.add(position)
@@ -270,7 +272,7 @@ def create_position(position_dict: Dict) -> model.Position:
 
 def change_position_state(position_id, state):
     try:
-        with Session(model.engine) as session, session.begin():
+        with Session(engine) as session, session.begin():
             position = session.query(model.Position).get(position_id)
 
             position.state = state
@@ -282,7 +284,7 @@ def change_position_state(position_id, state):
 def save_operation(operation_dict: Dict) -> int:
 
     try:
-        with Session(model.engine) as session:
+        with Session(engine) as session:
             with session.begin():
 
                 operation_id = operation_dict.get('operation_id')
@@ -306,7 +308,7 @@ def save_operation(operation_dict: Dict) -> int:
 def save_spot_order(spot_order_dict: Dict):
 
     try:
-        with Session(model.engine) as session:
+        with Session(engine) as session:
             with session.begin():
 
                 spot_order_id = spot_order_dict.get('spot_order_id')
@@ -330,7 +332,7 @@ def save_spot_order(spot_order_dict: Dict):
 def save_spot_trade(spot_trade_dict: Dict):
 
     try:
-        with Session(model.engine) as session:
+        with Session(engine) as session:
             with session.begin():
 
                 spot_trade_id = spot_trade_dict.get('spot_trade_id')
@@ -355,7 +357,7 @@ def save_transfer(transfer: Dict):
     transfer_id = None
 
     try:
-        with Session(model.engine) as session:
+        with Session(engine) as session:
             with session.begin():
 
                 transfer = model.Transfer(
@@ -379,7 +381,7 @@ def save_transfer(transfer: Dict):
 def save_future_order(future_order_dict: Dict):
 
     try:
-        with Session(model.engine) as session:
+        with Session(engine) as session:
             with session.begin():
 
                 future_order_id = future_order_dict.get('future_order_id')
@@ -403,7 +405,7 @@ def save_future_order(future_order_dict: Dict):
 def save_future_trade(future_trade_dict: Dict):
 
     try:
-        with Session(model.engine) as session:
+        with Session(engine) as session:
             with session.begin():
 
                 future_trade_id = future_trade_dict.get('future_trade_id')
@@ -447,7 +449,7 @@ def del_row(last_date, conn, tabla='spot_historical'):
 
 def save_current_signal(symbol, data):
     from datetime import datetime
-    with Session(model.engine) as session, session.begin():
+    with Session(engine) as session, session.begin():
 
         save_current = session.query(model.CurrentSignal).get(symbol)
 
@@ -461,7 +463,7 @@ def save_current_signal(symbol, data):
 
 def get_data_ratio(ticker, quantity):
 
-    conn = model.engine
+    conn = engine
 
     query = 'select avg(year_ratio) avg_year_ratio from ' \
             '(select year_ratio from historical_ratios where ' \
@@ -472,7 +474,7 @@ def get_data_ratio(ticker, quantity):
     return res
 
 def save_avg_ratio(symbol, attribute, ratio):
-    with Session(model.engine) as session, session.begin():
+    with Session(engine) as session, session.begin():
 
         current_signal = session.query(model.CurrentSignal).get(symbol)
 

@@ -486,3 +486,6 @@ real_tables = [table_value for (table_key, table_value) in Base.metadata.tables.
 
 def create_tables():
     Base.metadata.create_all(engine, tables=real_tables)
+
+def get_engine():
+    return create_engine(keys.DB_CONNECTION)

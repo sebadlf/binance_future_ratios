@@ -8,9 +8,15 @@ import time
 import app
 from model_service import sync_futures_prices, get_current_futures
 
+import model
+
 cache = dict()
 
+engine = model.get_engine()
+
 def task_current_futures_price():
+    engine.dispose()
+
     time.sleep(5)
 
     twm = ThreadedWebsocketManager(api_key=keys.api_key, api_secret=keys.api_secret)
@@ -36,7 +42,7 @@ def task_current_futures_price():
                 to_save.append(item_value)
 
             if len(to_save):
-                sync_futures_prices(to_save)
+                sync_futures_prices(engine, to_save)
         except Exception as ex:
             print(ex)
 

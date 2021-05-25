@@ -5,7 +5,7 @@ import time
 
 import model
 
-# import model_view
+import model_view
 
 import model_service
 
@@ -36,11 +36,11 @@ if __name__ == '__main__':
     task_current_spot = Process(name="task_current_spot", target=task_current_spot)
     task_current_spot.start()
 
-    # task_current_spot_price = Process(name="task_current_spot_price", target=task_current_spot_price)
-    # task_current_spot_price.start()
-    #
-    # task_current_futures_price = Process(name="task_current_futures_price", target=task_current_futures_price)
-    # task_current_futures_price.start()
+    task_current_spot_price = Process(name="task_current_spot_price", target=task_current_spot_price)
+    task_current_spot_price.start()
+
+    task_current_futures_price = Process(name="task_current_futures_price", target=task_current_futures_price)
+    task_current_futures_price.start()
     #
     # task_historical_spot = Process(name="task_historical_spot", target=task_historical_spot)
     # task_historical_spot.start()

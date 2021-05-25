@@ -9,9 +9,15 @@ import time
 import app
 from model_service import sync_spot_prices, spot_symbols_with_futures
 
+import model
+
 cache = dict()
 
+engine = model.get_engine()
+
 def task_current_spot_price():
+    engine.dispose()
+
     time.sleep(5)
 
     twm = ThreadedWebsocketManager(api_key=keys.api_key, api_secret=keys.api_secret)
@@ -37,7 +43,7 @@ def task_current_spot_price():
                 to_save.append(item_value)
 
             if len(to_save):
-                sync_spot_prices(to_save)
+                sync_spot_prices(engine, to_save)
         except Exception as ex:
             print(ex)
             traceback.print_stack()
