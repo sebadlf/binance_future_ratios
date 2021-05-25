@@ -16,8 +16,9 @@ def task_avg_ratio(tickers, field, quantity, sleep_time):
             try:
                 avg = model_service.get_data_ratio(engine, ticker=ticker, quantity=quantity)
                 model_service.save_avg_ratio(engine, ticker, field, avg)
-            except:
-                pass
+            except Exception as ex:
+                print(field)
+                print(ex)
 
             time.sleep(sleep_time / len(tickers))
 
