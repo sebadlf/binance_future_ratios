@@ -1,7 +1,6 @@
 import time
 import app
 import model_service
-from sqlalchemy import create_engine
 import utils
 import keys
 from datetime import datetime as dt

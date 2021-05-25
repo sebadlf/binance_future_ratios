@@ -43,10 +43,10 @@ if __name__ == '__main__':
     task_current_futures_price = Process(name="task_current_futures_price", target=task_current_futures_price)
     task_current_futures_price.start()
 
-    task_historical_spot = Process(name="task_historical_spot", target=task_historical_spot)
+    task_historical_spot = Thread(name="task_historical_spot", target=task_historical_spot)
     task_historical_spot.start()
 
-    task_historical_futures = Process(name="task_historical_futures", target=task_historical_futures)
+    task_historical_futures = Thread(name="task_historical_futures", target=task_historical_futures)
     task_historical_futures.start()
     #
     # task_avg_ratio1 = Process(name="task_avg_ratio", target=task_avg_ratio, args=('weekly_avg_year_ratio', 10080, 10080))
