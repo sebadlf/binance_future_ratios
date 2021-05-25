@@ -67,56 +67,54 @@ if __name__ == '__main__':
 
     task_avg_ratio5 = Process(name="task_avg_ratio", target=task_avg_ratio, args=(tickers, 'ten_minutes_avg_year_ratio', 10))
     task_avg_ratio5.start()
-    #
-    # time.sleep(10)
-    #
-    # task_current_signal = Thread(name="task_current_signal", target=task_current_signal)
-    # task_current_signal.start()
-    #
-    # task_stock_bnb = Thread(name="task_stock_bnb", target=task_stock_bnb)
-    # task_stock_bnb.start()
-    #
-    # time.sleep(10)
-    #
-    # print("Start")
-    #
-    # amount_usdt = amount_ticker("USDT")
-    #
-    # while True:
-    #
-    #     if amount_usdt > 25:
-    #         positions_to_open = model_service.get_current_ratios()
-    #
-    #         if len(positions_to_open):
-    #             best_position = [row for row in model_service.get_current_ratios()][0]
-    #
-    #             print("Abro posición", best_position)
-    #
-    #             position_data = position_service.open_position(best_position)
-    #
-    #             print("position_data", position_data)
-    #
-    #             position_service.save_opened_position(position_data)
-    #
-    #             amount_usdt = amount_ticker("USDT")
-    #
-    #     ###########################
-    #
-    #     positions_to_close = model_service.get_current_operations_to_close()
-    #
-    #     if len(positions_to_close):
-    #         position_to_close = [row for row in model_service.get_current_operations_to_close()][0]
-    #
-    #         direct_ratio_diff = position_to_close['direct_ratio_diff']
-    #
-    #         print(f"Cierror posición con diff = {round(direct_ratio_diff, 4)}", position_to_close)
-    #
-    #         position_data = position_service.close_position(position_to_close)
-    #
-    #         print(position_data)
-    #
-    #         position_service.save_closed_position(position_data)
-    #
-    #         amount_usdt = amount_ticker("USDT")
+
+    task_current_signal = Process(name="task_current_signal", target=task_current_signal, args=(tickers, ))
+    task_current_signal.start()
+
+    task_stock_bnb = Thread(name="task_stock_bnb", target=task_stock_bnb)
+    task_stock_bnb.start()
+
+    time.sleep(10)
+
+    print("Start")
+
+    amount_usdt = amount_ticker("USDT")
+
+    while True:
+
+        if amount_usdt > 25:
+            positions_to_open = model_service.get_current_ratios()
+
+            if len(positions_to_open):
+                best_position = [row for row in model_service.get_current_ratios()][0]
+
+                print("Abro posición", best_position)
+
+                position_data = position_service.open_position(best_position)
+
+                print("position_data", position_data)
+
+                position_service.save_opened_position(position_data)
+
+                amount_usdt = amount_ticker("USDT")
+
+        ###########################
+
+        positions_to_close = model_service.get_current_operations_to_close()
+
+        if len(positions_to_close):
+            position_to_close = [row for row in model_service.get_current_operations_to_close()][0]
+
+            direct_ratio_diff = position_to_close['direct_ratio_diff']
+
+            print(f"Cierror posición con diff = {round(direct_ratio_diff, 4)}", position_to_close)
+
+            position_data = position_service.close_position(position_to_close)
+
+            print(position_data)
+
+            position_service.save_closed_position(position_data)
+
+            amount_usdt = amount_ticker("USDT")
 
 
