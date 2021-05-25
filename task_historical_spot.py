@@ -8,6 +8,10 @@ from datetime import datetime as dt
 import traceback
 import requests
 
+import model
+
+engine = model.get_engine()
+
 def download_info_while(symbol, startTime, interval='4h', limit=1000):
     startTime = int(dt.strptime(startTime, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 
@@ -86,10 +90,10 @@ def getHistorical(symbol, startTime, endTime = None, quote_currency='USDT', inte
 #     return futures_tickers, spot_tickers
 
 def task_historical_spot(start_time = '2021-04-01 00:00:00'):
+    engine.dispose()
+
 
     time.sleep(10)
-
-    db_connection = create_engine(keys.DB_CONNECTION)
 
     tickers = utils.currencies()
     tickers = tickers[1]
@@ -103,15 +107,15 @@ def task_historical_spot(start_time = '2021-04-01 00:00:00'):
             # print(ticker, end=', ')
 
             try:
-                last_date = model_service.last_date(ticker, db_connection)
+                last_date = model_service.last_date(ticker, engine)
 
                 if last_date:
-                    model_service.del_row(last_date, db_connection)
+                    model_service.del_row(last_date, engine)
                     start_time = last_date[1]
 
                 historical_data = getHistorical(ticker, startTime= start_time)
                 if historical_data != []:
-                    model_service.save_historical_data_spot(ticker, historical_data)
+                    model_service.save_historical_data_spot(engine, ticker, historical_data)
             except:
                 traceback.print_exc()
                 pass

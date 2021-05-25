@@ -12,8 +12,6 @@ import pandas as pd
 
 import config
 
-engine = model.get_engine()
-
 spot_symbols_with_futures = [
     'ADAUSDT',
     'BCHUSDT',
@@ -213,7 +211,7 @@ def get_current_operations_to_close():
 
         return futures_info
 
-def save_historical_data_spot(symbol, historical_data):
+def save_historical_data_spot(engine, symbol, historical_data):
     with Session(engine) as session, session.begin():
         for hour_data in historical_data:
             market_data = model.SpotHistorical(symbol=symbol)
@@ -233,7 +231,7 @@ def save_historical_data_spot(symbol, historical_data):
             market_data.ignore = hour_data[11]
 
 
-def save_historical_data_futures(symbol, historical_data):
+def save_historical_data_futures(engine, symbol, historical_data):
     with Session(engine) as session, session.begin():
         for hour_data in historical_data:
             market_data = model.FuturesHistorical(symbol=symbol)

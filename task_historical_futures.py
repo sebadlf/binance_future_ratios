@@ -9,6 +9,10 @@ import traceback
 
 import utils
 
+import model
+
+engine = model.get_engine()
+
 def download_info_while(symbol, startTime, interval='1m', limit=1500):
     startTime = int(dt.strptime(startTime, '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 
@@ -66,7 +70,7 @@ def getHistorical(symbol, startTime, endTime = None, quote_currency='USDT', inte
 
 def task_historical_futures(start_time = '2021-04-01 00:00:00'):
 
-    db_connection = create_engine(keys.DB_CONNECTION)
+    engine.dispose()
 
     tickers = utils.currencies()
     tickers = tickers[0]
@@ -80,16 +84,16 @@ def task_historical_futures(start_time = '2021-04-01 00:00:00'):
             # print(ticker, end=', ')
 
             try:
-                last_date = model_service.last_date(ticker, db_connection, tabla= 'future_historical')
+                last_date = model_service.last_date(ticker, engine, tabla= 'future_historical')
 
                 if last_date:
-                    model_service.del_row(last_date, db_connection, tabla= 'future_historical')
+                    model_service.del_row(last_date, engine, tabla= 'future_historical')
                     start_time = last_date[1]
 
                 historical_data = getHistorical(ticker, startTime= start_time)
 
                 if historical_data != []:
-                    model_service.save_historical_data_futures(ticker, historical_data)
+                    model_service.save_historical_data_futures(engine, ticker, historical_data)
 
             except:
                 traceback.print_exc()
