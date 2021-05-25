@@ -16,7 +16,9 @@ def task_avg_ratio(tickers, field, quantity, sleep_time):
     while app.running:
         for ticker in tickers:
             try:
+                print("get_data_ratio", field, "start")
                 avg = model_service.get_data_ratio(engine, ticker=ticker, quantity=quantity)
+                print("get_data_ratio", field, "end")
                 model_service.save_avg_ratio(engine, ticker, field, avg)
             except Exception as ex:
                 print(field)
