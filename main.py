@@ -30,6 +30,8 @@ import utils
 if __name__ == '__main__':
     model.create_tables()
 
+    model_view.create_views()
+
     init_leverages()
 
     task_current_futures = Thread(name="task_current_futures", target=task_current_futures)

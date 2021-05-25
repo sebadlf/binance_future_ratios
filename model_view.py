@@ -17,7 +17,6 @@ def create_view(name, query, **kwargs):
     with engine.connect() as connection:
         connection.execute(stm_create, **kwargs)
 
-
 current_ratios = '''
     SELECT 	f.symbol as future_symbol,
             fp.bid_price as future_price,
@@ -47,8 +46,6 @@ current_ratios = '''
     ORDER BY
             year_ratio DESC
     '''
-
-create_view("current_ratios", current_ratios, perp_like='%_PERP')
 
 current_operation_to_close = '''
     SELECT 	p.id as position_id,
@@ -102,7 +99,6 @@ current_operation_to_close = '''
             AND ocr.year_ratio - o.year_ratio > 0   
     '''
 
-create_view("current_operation_to_close", current_operation_to_close)
 
 historical_ratios = '''
     SELECT 	fh.open_time,
@@ -130,4 +126,9 @@ historical_ratios = '''
     WHERE	f.symbol NOT LIKE '%_PERP'
     '''
 
-create_view("historical_ratios", historical_ratios)
+def create_views():
+    create_view("current_ratios", current_ratios, perp_like='%_PERP')
+    create_view("current_operation_to_close", current_operation_to_close)
+    create_view("historical_ratios", historical_ratios)
+
+
