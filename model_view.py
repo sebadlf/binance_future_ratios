@@ -126,9 +126,38 @@ historical_ratios = '''
     WHERE	f.symbol NOT LIKE '%_PERP'
     '''
 
+operation_evaluation = '''
+    select 	o.position_id,
+            o.kind,
+            o.future,
+            o.spot,
+            o.future_price,
+            ft.price future_price_real,
+            round((o.future_price / ft.price - 1) * 100, 4) as future_price_diff_pct,
+            o.spot_price,
+            st.price spot_price_real,
+            round((o.spot_price / st.price - 1) * 100, 4) as spot_price_diff_pct,
+            round((o.future_price / o.spot_price - 1) * 100, 4) as direct_ratio,
+            round((ft.price / st.price - 1) * 100, 4) as direct_ratio_real,
+            round(((o.future_price / o.spot_price) - (ft.price / st.price)) * 100, 4) as direct_ratio_diff,
+            round((o.future_price / o.spot_price) / (ft.price / st.price) - 1, 4) as direct_ratio_diff_pct
+    from 	operation o 
+    join 	spot_order so
+    on		o.id = so.operation_id
+    join 	spot_trade st
+    on		so.id = spot_order_id
+    join 	future_order fo
+    on		o.id = fo.operation_id
+    join 	future_trade ft
+    on 		fo.id = ft.future_order_id
+    '''
+
+
+
 def create_views():
     create_view("current_ratios", current_ratios, perp_like='%_PERP')
     create_view("current_operation_to_close", current_operation_to_close)
     create_view("historical_ratios", historical_ratios)
+    create_view("operation_evaluation", operation_evaluation)
 
 
