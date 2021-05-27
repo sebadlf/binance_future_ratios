@@ -47,6 +47,15 @@ current_ratios = '''
             year_ratio DESC
     '''
 
+future_trade_grouped = '''
+    select 		future_order_id, 
+                sum(base_qty) as base_qty, 
+                sum(commission) as commission, 
+                count(*) as trades_count
+    from 		future_trade
+    group by	future_order_id
+    '''
+
 current_operation_to_close = '''
     SELECT 	p.id as position_id,
             o.id as operation_id,
@@ -73,7 +82,9 @@ current_operation_to_close = '''
             t.amount as transfer_amount,
             ft.base_qty as future_base_qty,
             ft.commission as future_commission,
-            ocr.future_symbol as better_future_symbol
+            ocr.future_symbol as better_future_symbol,
+			ocr.direct_ratio as better_direct_ratio,
+			ocr.year_ratio as better_year_ratio
     FROM	position p	
     JOIN 	operation o
     ON		p.id = o.position_id
@@ -82,7 +93,7 @@ current_operation_to_close = '''
     ON		o.id = t.operation_id
     JOIN	future_order fo
     ON		o.id = fo.operation_id
-    JOIN	future_trade ft
+    JOIN	future_trade_grouped ft
     ON		fo.id = ft.future_order_id
     JOIN	future f
     ON		fo.symbol = f.symbol
@@ -95,10 +106,10 @@ current_operation_to_close = '''
 	JOIN	current_signal cs
 	ON		f.symbol = cs.symbol
     LEFT JOIN	current_ratios ocr
-    ON		ocr.direct_ratio - o.direct_ratio > 0
+    ON		ocr.future_symbol != f.symbol
+			AND ocr.direct_ratio - o.direct_ratio > 0
             AND ocr.year_ratio - o.year_ratio > 0   
     '''
-
 
 historical_ratios = '''
     SELECT 	fh.open_time,
@@ -152,10 +163,9 @@ operation_evaluation = '''
     on 		fo.id = ft.future_order_id
     '''
 
-
-
 def create_views():
     create_view("current_ratios", current_ratios, perp_like='%_PERP')
+    create_view("future_trade_grouped", future_trade_grouped)
     create_view("current_operation_to_close", current_operation_to_close)
     create_view("historical_ratios", historical_ratios)
     create_view("operation_evaluation", operation_evaluation)
