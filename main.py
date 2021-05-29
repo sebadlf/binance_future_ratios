@@ -23,6 +23,8 @@ from task_historical_futures import task_historical_futures
 from task_current_signal import task_current_signal
 from task_stock_bnb import task_stock_bnb, amount_ticker
 from task_avg_ratio import task_avg_ratio
+from task_spot_order_book import task_current_spot_order_book
+from task_futures_order_book import task_current_futures_order_book
 
 import utils
 
