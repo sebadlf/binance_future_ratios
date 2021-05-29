@@ -1,0 +1,29 @@
+app_1  | requests.exceptions.ConnectionError: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+app_1  | Cierror posición con diff = 0.5105 {'position_id': 13, 'operation_id': 18, 'future_symbol': 'DOTUSD_210625', 'future_price': 22.975, 'spot_symbol': 'DOTUSDT', 'spot_price': 22
+.907, 'direct_ratio': 0.2968559596631559, 'hours': 703, 'hour_ratio': 0.0004222702128921137, 'days': 29, 'year_ratio': 3.699087064934916, 'contract_size': 10, 'buy_per_contract': 0.435
+25570550437975, 'tick_size': 0.001, 'base_asset': 'DOT', 'signal': 'close', 'contract_qty': 2, 'transfer_amount': 0.837, 'future_base_qty': 0.411117, 'future_commission': 0.00020555, '
+direct_ratio_diff': 0.5104959275629488, 'year_ratio_diff': 6.346939164923482, 'better_future_symbol': None}
+app_1  | APIError(code=-5013): Asset transfer failed: insufficient balance
+app_1  | Traceback (most recent call last):
+app_1  |   File "/code/position_service.py", line 181, in close_position
+app_1  |     transfer = binance_client.universal_transfer(type=CLOSE_POSITION_TRANSFER_TYPE, asset=base_asset, amount=quantity_to_sell)
+app_1  |   File "/usr/local/lib/python3.8/site-packages/binance/client.py", line 5656, in universal_transfer
+app_1  |     return self._request_margin_api(
+app_1  |   File "/usr/local/lib/python3.8/site-packages/binance/client.py", line 358, in _request_margin_api
+app_1  |     return self._request(method, uri, signed, **kwargs)
+app_1  |   File "/usr/local/lib/python3.8/site-packages/binance/client.py", line 309, in _request
+app_1  |     return self._handle_response(self.response)
+app_1  |   File "/usr/local/lib/python3.8/site-packages/binance/client.py", line 318, in _handle_response
+app_1  |     raise BinanceAPIException(response, response.status_code, response.text)
+app_1  | binance.exceptions.BinanceAPIException: APIError(code=-5013): Asset transfer failed: insufficient balance
+app_1  | {'position': {'position_id': 13, 'operation_id': 18, 'future_symbol': 'DOTUSD_210625', 'future_price': 22.975, 'spot_symbol': 'DOTUSDT', 'spot_price': 22.907, 'direct_ratio':
+0.2968559596631559, 'hours': 703, 'hour_ratio': 0.0004222702128921137, 'days': 29, 'year_ratio': 3.699087064934916, 'contract_size': 10, 'buy_per_contract': 0.43525570550437975, 'tick_
+size': 0.001, 'base_asset': 'DOT', 'signal': 'close', 'contract_qty': 2, 'transfer_amount': 0.837, 'future_base_qty': 0.411117, 'future_commission': 0.00020555, 'direct_ratio_diff': 0.
+5104959275629488, 'year_ratio_diff': 6.346939164923482, 'better_future_symbol': None}, 'spot_order': None, 'spot_order_update': None, 'spot_trade': None, 'transfer': None, 'future_orde
+r': {'orderId': 581493885, 'symbol': 'DOTUSD_210625', 'pair': 'DOTUSD', 'status': 'NEW', 'clientOrderId': 'JGUjTx2cAwV9wecV5tYu2L', 'price': '0', 'avgPrice': '0.000', 'origQty': '2', '
+executedQty': '0', 'cumQty': '0', 'cumBase': '0', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice
+': '0', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'updateTime': 1622078292062}, 'future_order_update': None, 'future_trade': [{'symbol': 'DOTUSD_210
+625', 'id': 6568506, 'orderId': 581493885, 'pair': 'DOTUSD', 'side': 'BUY', 'price': '22.966', 'qty': '1', 'realizedPnl': '0.02479053', 'marginAsset': 'DOT', 'baseQty': '0.43542628', '
+commission': '0.00021771', 'commissionAsset': 'DOT', 'time': 1622078292062, 'positionSide': 'BOTH', 'buyer': True, 'maker': False}, {'symbol': 'DOTUSD_210625', 'id': 6568507, 'orderId'
+: 581493885, 'pair': 'DOTUSD', 'side': 'BUY', 'price': '22.975', 'qty': '1', 'realizedPnl': '0.02461996', 'marginAsset': 'DOT', 'baseQty': '0.43525571', 'commission': '0.00021762', 'co
+mmissionAsset': 'DOT', 'time': 1622078292062, 'positionSide': 'BOTH', 'buyer': True, 'maker': False}]}

@@ -195,7 +195,7 @@ def get_current_operations_to_close():
     with Session(engine) as session, session.begin():
         current_operation_to_close = session.query(model.CurrentOperationToClose). \
             filter(model.CurrentOperationToClose.signal == 'close').\
-            filter(model.CurrentOperationToClose.direct_ratio_diff > 1).all()
+            filter(model.CurrentOperationToClose.direct_ratio_diff > 0.5).all()
 
         for operation_to_close in current_operation_to_close:
 
