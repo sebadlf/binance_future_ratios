@@ -51,7 +51,6 @@ def price_risk_safe(symbol, book, risk = config.RISK, safe = config.SAFE):
     #     print(sum_provisorio_total)
         # print(book)
 
-
     if sum_size_risk != 0:
         price_risk = sum_total_risk / sum_size_risk
     if sum_total_safe != 0:
@@ -73,7 +72,7 @@ def ppp_order_book(symbol, book, risk = config.RISK, safe = config.SAFE):
     return res
 
 
-def task_current_spot_price():
+def task_current_spot_order_book():
     engine.dispose()
 
     time.sleep(5)
@@ -120,7 +119,5 @@ def task_current_spot_price():
             traceback.print_stack()
 
 if __name__ == '__main__':
-    # model.create_tables()
-
-    task_current_spot_price()
+    task_current_spot_order_book()
 

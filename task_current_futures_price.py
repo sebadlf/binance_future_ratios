@@ -26,6 +26,7 @@ def task_current_futures_price():
         data = msg['data']
 
         symbol = data['s']
+        print(symbol)
 
         cache[symbol] = data
 
