@@ -101,8 +101,6 @@ def task_current_spot_price():
 
     while app.running:
 
-        # start_time = time.time()
-
         try:
             to_save = []
 
@@ -115,16 +113,11 @@ def task_current_spot_price():
                 to_save.append(ppp)
 
             if len(to_save):
-                print(len(to_save))
-                # print(to_save)
                 sync_spot_prices_calc(engine, to_save)
 
         except Exception as ex:
             print(ex)
             traceback.print_stack()
-
-        # if start_time > 0.01:
-        #     print(time.time() - start_time)
 
 if __name__ == '__main__':
     # model.create_tables()
