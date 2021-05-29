@@ -112,7 +112,8 @@ def task_current_futures_order_book():
                 to_save.append(ppp)
 
             if len(to_save):
-                sync_futures_prices_calc(engine, to_save)
+                print(len(to_save))
+                # sync_futures_prices_calc(engine, to_save)
 
         except Exception as ex:
             print(ex)
