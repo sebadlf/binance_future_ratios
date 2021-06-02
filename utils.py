@@ -48,22 +48,21 @@ def bring_data_db(ticker, k ,table, column_name_symbol = 'future_symbol'):
     return df
 
 
-def sma(ticker, k, table, column_name = 'year_ratio'):
-    k_adjusted = k
+def sma(data, k, column_name = 'year_ratio'):
+
     try:
-        data = bring_data_db(ticker,  k_adjusted, table)
         data['sma'] = data[column_name].rolling(k).mean()
 
         return data.iloc[-1,2]
 
     except:
         traceback.print_exc()
+
         return None
 
-def ema(ticker, k, table, column_name = 'year_ratio'):
-    k_adjusted = (k*2) + 10
+def ema(data, k, column_name = 'year_ratio'):
+
     try:
-        data = bring_data_db(ticker,  k_adjusted, table)
         data['ema'] = data[column_name].ewm(span= k, adjust=False).mean()
 
         return data.iloc[-1,2]
