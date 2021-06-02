@@ -478,6 +478,20 @@ class CurrentRatios(Base):
     )
 
 
+class CurrentRatiosQuick(Base):
+    __tablename__ = 'historical_ratios_quick'
+
+    time = Column(DATETIME, primary_key=True)
+    future_symbol = Column(String(20), primary_key=True)
+    spot_symbol = Column(String(20), primary_key=True)
+    hours = Column(Integer)
+    days = Column(Integer)
+    future_price = Column(Float)
+    spot_price = Column(Float)
+    direct_ratio = Column(Float)
+    hour_ratio = Column(Float)
+    year_ratio = Column(Float)
+
 engine = create_engine(keys.DB_CONNECTION)
 
 view_tables = ['current_ratios', 'current_operation_to_close']
@@ -489,3 +503,6 @@ def create_tables():
 
 def get_engine():
     return create_engine(keys.DB_CONNECTION)
+
+if __name__ == '__main__':
+    create_tables()
