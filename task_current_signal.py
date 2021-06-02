@@ -12,12 +12,19 @@ def task_current_signal(sma = config.SMA, ema = config.EMA, table = 'historical_
     tickers = utils.currencies()
     tickers = tickers[0]
 
+    if sma > ema:
+        cant_rows = (sma*2) + 10
+    else:
+        cant_rows = (ema*2) + 10
+
     while app.running:
         for ticker in tickers:
 
             try:
-                sma_value = utils.sma(ticker = ticker, k = sma, table= table)
-                ema_value = utils.ema(ticker = ticker, k = ema, table= table)
+
+                data = utils.bring_data_db(ticker = ticker, k = cant_rows, table = table)
+                sma_value = utils.sma(data = data, k = sma)
+                ema_value = utils.ema(data = data, k = ema)
 
                 if ema_value and sma_value:
                     if ema_value <= sma_value:
