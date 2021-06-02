@@ -22,7 +22,7 @@ def task_historical_ratios_quick():
 
         seconds = future_time.timetuple().tm_sec
 
-        future_time = future_time.replace(second=int(seconds / 10) * 10)
+        future_time = future_time.replace(second=int(seconds / 10) * 10).replace(microsecond=0)
 
         difference = future_time - current_time
 
