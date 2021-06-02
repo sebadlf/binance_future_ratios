@@ -74,6 +74,25 @@ class SpotPrice(Base):
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
+class SpotPriceCalc(Base):
+    __tablename__ = 'spot_price_calc'
+
+    symbol = Column(String(20), ForeignKey('spot.symbol'), primary_key=True)
+    # price = Column(Float)
+
+    ask_risk = Column(Float)
+    ask_safe = Column(Float)
+    bid_risk = Column(Float)
+    bid_safe = Column(Float)
+
+    # spot = relationship("Spot", back_populates="spot_price")
+
+    inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
+    updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+
     # __tabl
     # e_args__ = (
     #     Index('symbol', symbol),
@@ -112,6 +131,22 @@ class FuturePrice(Base):
 
     # timestamp = Column(BigInteger)
     # time = Column(DATETIME)
+
+    inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
+    updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class FuturePriceCalc(Base):
+    __tablename__ = 'futures_price_calc'
+
+    symbol = Column(String(20), ForeignKey('future.symbol'), primary_key=True)
+    # price = Column(Float)
+
+    ask_risk = Column(Float)
+    ask_safe = Column(Float)
+    bid_risk = Column(Float)
+    bid_safe = Column(Float)
+
+    # spot = relationship("Spot", back_populates="spot_price")
 
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)

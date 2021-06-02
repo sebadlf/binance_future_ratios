@@ -76,6 +76,23 @@ def sync_spot_prices(engine, spot_prices):
                 spot_price_db.bid_price = spot_price['b']
                 spot_price_db.bid_qty = spot_price['B']
 
+def sync_spot_prices_calc(engine, spot_prices):
+    with Session(engine) as session, session.begin():
+        for spot_price in spot_prices:
+            symbol = spot_price['s']
+
+            if symbol in spot_symbols_with_futures:
+                spot_price_calc_db = session.query(model.SpotPriceCalc).get(symbol)
+
+                if not spot_price_calc_db:
+                    spot_price_calc_db = model.SpotPriceCalc(symbol=symbol)
+                    session.add(spot_price_calc_db)
+
+                spot_price_calc_db.ask_risk = spot_price['ask_risk']
+                spot_price_calc_db.ask_safe = spot_price['ask_safe']
+                spot_price_calc_db.bid_risk = spot_price['bid_risk']
+                spot_price_calc_db.bid_safe = spot_price['bid_safe']
+
 
 def sync_futures(engine, futures):
     with Session(engine) as session, session.begin():
@@ -131,6 +148,22 @@ def sync_futures_prices(engine, futures_prices):
             future_price_db.ask_qty = future_price['A']
             future_price_db.bid_price = future_price['b']
             future_price_db.bid_qty = future_price['B']
+
+def sync_futures_prices_calc(engine, futures_prices):
+    with Session(engine) as session, session.begin():
+        for future_price in futures_prices:
+            symbol = future_price['s']
+
+            future_price_db = session.query(model.FuturePriceCalc).get(symbol)
+
+            if not future_price_db:
+                future_price_db = model.FuturePriceCalc(symbol=symbol)
+                session.add(future_price_db)
+
+            future_price_db.ask_risk = future_price['ask_risk']
+            future_price_db.ask_safe = future_price['ask_safe']
+            future_price_db.bid_risk = future_price['bid_risk']
+            future_price_db.bid_safe = future_price['bid_safe']
 
 
 def get_current_ratios():
