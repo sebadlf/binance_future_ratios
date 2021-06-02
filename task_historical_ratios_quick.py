@@ -27,35 +27,36 @@ def task_historical_ratios_quick():
         time.sleep(difference.total_seconds())
 
         try:
-            with engine.begin() as connection:
-                query = f"""
-                insert historical_ratios_quick(
-                    time,
-                    future_symbol,
-                    spot_symbol,
-                    hours,
-                    days,
-                    future_price,
-                    spot_price,
-                    direct_ratio,
-                    hour_ratio,
-                    year_ratio
-                ) select 
-                    now(),
-                    future_symbol,
-                    spot_symbol,
-                    hours,
-                    days,
-                    future_price,
-                    spot_price,
-                    direct_ratio,
-                    hour_ratio,
-                    year_ratio	 
-                from
-                    current_ratios
-                """
+            with engine.connect().execution_options(isolation_level="SERIALIZABLE") as connection:
+                with connection.begin():
+                    query = f"""
+                    insert historical_ratios_quick(
+                        time,
+                        future_symbol,
+                        spot_symbol,
+                        hours,
+                        days,
+                        future_price,
+                        spot_price,
+                        direct_ratio,
+                        hour_ratio,
+                        year_ratio
+                    ) select 
+                        now(),
+                        future_symbol,
+                        spot_symbol,
+                        hours,
+                        days,
+                        future_price,
+                        spot_price,
+                        direct_ratio,
+                        hour_ratio,
+                        year_ratio	 
+                    from
+                        current_ratios
+                    """
 
-                connection.execute(query)
+                    connection.execute(query)
 
         except Exception as ex:
             print(ex)
