@@ -63,4 +63,5 @@ def task_historical_ratios_quick():
             traceback.print_stack()
 
 if __name__ == '__main__':
+    model.create_tables()
     task_historical_ratios_quick()
