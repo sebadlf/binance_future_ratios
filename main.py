@@ -19,6 +19,7 @@ from task_current_spot_price import task_current_spot_price
 from task_current_futures import task_current_futures
 from task_current_futures_price import task_current_futures_price
 from task_historical_spot import task_historical_spot
+from task_historical_ratios_quick import task_historical_ratios_quick
 from task_historical_futures import task_historical_futures
 from task_current_signal import task_current_signal
 from task_stock_bnb import task_stock_bnb, amount_ticker
@@ -47,6 +48,9 @@ if __name__ == '__main__':
 
     task_current_futures_price = Process(name="task_current_futures_price", target=task_current_futures_price)
     task_current_futures_price.start()
+
+    task_historical_ratios_quick = Process(name="task_historical_ratios_quick", target=task_historical_ratios_quick)
+    task_historical_ratios_quick.start()
 
     task_historical_spot = Thread(name="task_historical_spot", target=task_historical_spot)
     task_historical_spot.start()
@@ -84,7 +88,7 @@ if __name__ == '__main__':
 
     amount_usdt = amount_ticker("USDT")
 
-    while True:
+    while True and False:
 
         if amount_usdt > 25:
             positions_to_open = model_service.get_current_ratios()

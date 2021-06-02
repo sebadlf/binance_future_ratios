@@ -146,7 +146,7 @@ def save_opened_position(data_dict: Dict):
 data = {'position': {'position_id': 1, 'operation_id': 1, 'future_symbol': 'DOTUSD_210625', 'future_price': 39.4567, 'spot_symbol': 'DOTUSDT', 'spot_price': 38.54, 'direct_ratio': 2.3786923328941834, 'hours': 942, 'hour_ratio': 0.0025251510964906403, 'days': 39, 'year_ratio': 22.12032360525801, 'contract_size': 10, 'buy_per_contract': 0.25344206664185204, 'tick_size': 0.001, 'base_asset': 'DOT', 'contract_qty': 2, 'transfer_amount': 0.419, 'future_base_qty': 0.416988, 'future_commission': 0.00020849, 'direct_ratio_diff': 0.6732626517707336, 'year_ratio_diff': 4.96693759469316, 'better_future_symbol': None}, 'spot_order': None, 'spot_order_update': None, 'spot_trade': None, 'transfer': None, 'future_order': {'orderId': 511229521, 'symbol': 'DOTUSD_210625', 'pair': 'DOTUSD', 'status': 'NEW', 'clientOrderId': 'TeY4zCikjfYL7CAohtUejc', 'price': '0', 'avgPrice': '0.000', 'origQty': '2', 'executedQty': '0', 'cumQty': '0', 'cumBase': '0', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '0', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'updateTime': 1621290515876}, 'future_order_update': None, 'future_trade': {'symbol': 'DOTUSD_210625', 'id': 5797720, 'orderId': 511229521, 'pair': 'DOTUSD', 'side': 'BUY', 'price': '39.531', 'qty': '1', 'realizedPnl': '0.03808768', 'marginAsset': 'DOT', 'baseQty': '0.25296603', 'commission': '0.00012648', 'commissionAsset': 'DOT', 'time': 1621290515876, 'positionSide': 'BOTH', 'buyer': True, 'maker': False}}
 
 
-def close_position(position_dict: Dict):
+def close_position(position_dict: Dict, verify_steps = False):
     spot_order = None
     spot_order_update = None
     spot_trade = None
@@ -166,7 +166,17 @@ def close_position(position_dict: Dict):
         sell_future_base_qty = position_dict['future_base_qty']
         sell_future_commission = position_dict['future_commission']
 
-        future_order = binance_client.futures_coin_create_order(symbol=future_symbol, side="BUY", type="MARKET", quantity=contract_qty)
+
+
+        if verify_steps == True:
+            position_id = position_dict['position_id']
+
+            future_order_id = 1
+
+            future_order_update = binance_service.get_future_order(future_symbol, future_order_id)
+        else:
+            future_order = binance_client.futures_coin_create_order(symbol=future_symbol, side="BUY", type="MARKET",
+                                                                    quantity=contract_qty)
 
         future_order_id = future_order['orderId']
 
