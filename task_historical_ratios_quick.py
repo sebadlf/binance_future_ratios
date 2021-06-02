@@ -5,6 +5,8 @@ import model
 
 from datetime import datetime, timedelta
 
+from sqlalchemy.orm import Session
+
 engine = model.get_engine()
 
 def task_historical_ratios_quick():
@@ -27,36 +29,24 @@ def task_historical_ratios_quick():
         time.sleep(difference.total_seconds())
 
         try:
-            with engine.connect().execution_options(isolation_level="SERIALIZABLE") as connection:
-                with connection.begin():
-                    query = f"""
-                    insert historical_ratios_quick(
-                        time,
-                        future_symbol,
-                        spot_symbol,
-                        hours,
-                        days,
-                        future_price,
-                        spot_price,
-                        direct_ratio,
-                        hour_ratio,
-                        year_ratio
-                    ) select 
-                        now(),
-                        future_symbol,
-                        spot_symbol,
-                        hours,
-                        days,
-                        future_price,
-                        spot_price,
-                        direct_ratio,
-                        hour_ratio,
-                        year_ratio	 
-                    from
-                        current_ratios
-                    """
 
-                    connection.execute(query)
+            with Session(engine) as session, session.begin():
+                current_ratios = session.query(model.CurrentRatios).all()
+
+                for current_ratio in current_ratios:
+                    ratio = model.HistoricalRatiosQuick()
+                    session.add(ratio)
+
+                    ratio.time = future_time
+                    ratio.future_symbol = current_ratio.future_symbol
+                    ratio.spot_symbol = current_ratio.spot_symbol
+                    ratio.hours = current_ratio.hours
+                    ratio.days = current_ratio.days
+                    ratio.future_price = current_ratio.future_price
+                    ratio.spot_price = current_ratio.spot_price
+                    ratio.direct_ratio = current_ratio.direct_ratio
+                    ratio.hour_ratio = current_ratio.hour_ratio
+                    ratio.year_ratio = current_ratio.year_ratio
 
         except Exception as ex:
             print(ex)

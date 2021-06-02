@@ -513,7 +513,7 @@ class CurrentRatios(Base):
     )
 
 
-class CurrentRatiosQuick(Base):
+class HistoricalRatiosQuick(Base):
     __tablename__ = 'historical_ratios_quick'
 
     time = Column(DATETIME, primary_key=True)
