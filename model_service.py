@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session, aliased
+from sqlalchemy import or_, and_
 from datetime import datetime, timezone
 import operator as op
 import traceback
@@ -10,6 +11,9 @@ import model_helper
 
 import pandas as pd
 
+from typing import Dict
+
+import utils
 import config
 
 engine = model.get_engine()
@@ -76,6 +80,7 @@ def sync_spot_prices(engine, spot_prices):
                 spot_price_db.bid_price = spot_price['b']
                 spot_price_db.bid_qty = spot_price['B']
 
+
 def sync_spot_prices_calc(engine, spot_prices):
     with Session(engine) as session, session.begin():
         for spot_price in spot_prices:
@@ -117,6 +122,9 @@ def sync_futures(engine, futures):
             future_db.contract_status = future['contractStatus']
             future_db.contract_size = future['contractSize']
 
+            future_db.base_asset = future['baseAsset']
+            future_db.quote_asset = future['quoteAsset']
+
 
 def sync_futures_prices(engine, futures_prices):
     with Session(engine) as session, session.begin():
@@ -149,6 +157,7 @@ def sync_futures_prices(engine, futures_prices):
             future_price_db.bid_price = future_price['b']
             future_price_db.bid_qty = future_price['B']
 
+
 def sync_futures_prices_calc(engine, futures_prices):
     with Session(engine) as session, session.begin():
         for future_price in futures_prices:
@@ -166,25 +175,36 @@ def sync_futures_prices_calc(engine, futures_prices):
             future_price_db.bid_safe = future_price['bid_safe']
 
 
-def get_current_ratios():
+def get_current_ratios_to_open():
     futures_info = []
 
-    #             filter(model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio).\
-
     with Session(engine) as session, session.begin():
-        future_ratios = session.query(model.CurrentRatios).join(model.CurrentRatios.current_signal).\
-            filter(model.CurrentRatios.year_ratio > config.MIN_YEAR_MARGIN).\
-            filter(model.CurrentRatios.spot_symbol != "BTCUSDT").\
-            filter(model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio). \
-            filter(model.CurrentSignal.six_hours_avg_year_ratio > model.CurrentSignal.daily_avg_year_ratio). \
-            filter(model.CurrentSignal.hourly_avg_year_ratio > model.CurrentSignal.six_hours_avg_year_ratio).\
-            filter(model.CurrentSignal.ten_minutes_avg_year_ratio > model.CurrentSignal.hourly_avg_year_ratio). \
-            filter(model.CurrentRatios.signal == 'open').\
-            all()
+        min_year_ratio = session.query(model.Configuration).get("min_year_ratio").value
+        min_direct_ratio = session.query(model.Configuration).get("min_direct_ratio").value
+
+        future_ratios = session.query(model.CurrentOperationsToOpen).join(model.CurrentOperationsToOpen.current_signal). \
+            filter(model.CurrentOperationsToOpen.year_ratio > min_year_ratio).\
+            filter(model.CurrentOperationsToOpen.direct_ratio > min_direct_ratio). \
+            filter(model.CurrentOperationsToOpen.signal == 'open')
+
+        future_ratios = future_ratios.filter(
+            or_(
+                and_(
+                    model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio,
+                    model.CurrentSignal.six_hours_avg_year_ratio > model.CurrentSignal.daily_avg_year_ratio,
+                    model.CurrentSignal.hourly_avg_year_ratio > model.CurrentSignal.six_hours_avg_year_ratio,
+                    model.CurrentSignal.ten_minutes_avg_year_ratio > model.CurrentSignal.hourly_avg_year_ratio
+                )
+                ,
+                model.CurrentOperationsToOpen.year_ratio > model.CurrentSignal.ten_minutes_avg_year_ratio * 2
+                )
+            )
+
+        future_ratios = future_ratios.all()
 
         for future_ratio in future_ratios:
-
             futures_info.append({
+                'position_id': future_ratio.position_id,
                 'future_symbol': future_ratio.future_symbol,
                 'future_price': future_ratio.future_price,
                 'spot_symbol': future_ratio.spot_symbol,
@@ -198,7 +218,9 @@ def get_current_ratios():
                 'buy_per_contract': future_ratio.buy_per_contract,
                 'tick_size': future_ratio.tick_size,
                 'base_asset': future_ratio.base_asset,
-                'signal': future_ratio.signal
+                'signal': future_ratio.signal,
+                'contract_qty': future_ratio.contract_qty,
+                'future_balance': future_ratio.future_balance,
             })
 
         return futures_info
@@ -207,17 +229,37 @@ def get_current_ratios():
 def get_current_operations_to_close():
     futures_info = []
 
-
     with Session(engine) as session, session.begin():
-        current_operation_to_close = session.query(model.CurrentOperationToClose). \
-            filter(model.CurrentOperationToClose.signal == 'close').\
-            filter(model.CurrentOperationToClose.direct_ratio_diff > 0.5).all()
+        current_operation_to_close = session.query(model.CurrentOperationToClose).\
+        filter(model.CurrentOperationToClose.signal == 'close')
+
+        current_operation_to_close = current_operation_to_close.filter(
+            or_(
+                and_(
+                    model.CurrentOperationToClose.direct_ratio_diff > 0.5,
+                    model.CurrentOperationToClose.better_direct_ratio > model.CurrentOperationToClose.direct_ratio + 0.5
+                ),
+
+                model.CurrentOperationToClose.direct_ratio < model.CurrentOperationToClose.open_avg_direct_ratio * 0.1,
+
+                model.CurrentOperationToClose.hours < 2
+            )
+        )
+
+        current_operation_to_close = current_operation_to_close.all()
 
         for operation_to_close in current_operation_to_close:
+            close_reason = None
+
+            if operation_to_close.hours < 2:
+                close_reason = 'Less to one hour left'
+            elif operation_to_close.direct_ratio < operation_to_close.open_avg_direct_ratio * 0.1:
+                close_reason = f'Current direct ratio diff {operation_to_close.direct_ratio / operation_to_close.open_avg_direct_ratio}'
+            elif operation_to_close.direct_ratio_diff > 0.5 and operation_to_close.better_direct_ratio > operation_to_close.direct_ratio + 0.5:
+                close_reason = f'Roll to {operation_to_close.better_future_symbol} | {operation_to_close.direct_ratio_diff} - {operation_to_close.better_direct_ratio} - {operation_to_close.direct_ratio}'
 
             futures_info.append({
                 'position_id': operation_to_close.position_id,
-                'operation_id': operation_to_close.operation_id,
                 'future_symbol': operation_to_close.future_symbol,
                 'future_price': operation_to_close.future_price,
                 'spot_symbol': operation_to_close.spot_symbol,
@@ -234,17 +276,17 @@ def get_current_operations_to_close():
                 'signal': operation_to_close.signal,
 
                 'contract_qty': operation_to_close.contract_qty,
-                'transfer_amount': operation_to_close.transfer_amount,
-                'future_base_qty': operation_to_close.future_base_qty,
-                'future_commission': operation_to_close.future_commission,
 
                 'direct_ratio_diff': operation_to_close.direct_ratio_diff,
                 'year_ratio_diff': operation_to_close.year_ratio_diff,
                 'better_future_symbol': operation_to_close.better_future_symbol,
 
+                'close_reason': close_reason
+
             })
 
         return futures_info
+
 
 def save_historical_data_spot(engine, symbol, historical_data):
     with Session(engine) as session, session.begin():
@@ -286,6 +328,22 @@ def save_historical_data_futures(engine, symbol, historical_data):
             market_data.ignore = hour_data[11]
 
 
+def position_open_save(best_position_dict: Dict, spot_order_dict: Dict):
+    with Session(engine) as session, session.begin():
+        best_position_dict['kind'] = 'OPEN'
+
+        position = model_helper.sync_position(best_position_dict)
+        session.add(position)
+
+        position.state = "BUY_SPOT_ORDER_INIT"
+
+        operation = model_helper.sync_operation(best_position_dict)
+        position.operations.append(operation)
+
+        spot_order = model_helper.sync_spot_order(spot_order_dict)
+        operation.spot_order = spot_order
+
+
 def create_position(position_dict: Dict) -> model.Position:
     position_id = None
 
@@ -303,19 +361,37 @@ def create_position(position_dict: Dict) -> model.Position:
 
     return position_id
 
-def change_position_state(position_id, state):
+
+def save_position_state(position_id, state, message):
     try:
         with Session(engine) as session, session.begin():
             position = session.query(model.Position).get(position_id)
 
             position.state = state
+            position.message = message
+
     except Exception as ex:
         print(f"Error al guardar estado {state} en Position {position_id}")
         print(ex)
         traceback.print_stack()
 
-def save_operation(operation_dict: Dict) -> int:
 
+def save_operation_state(operation_id, state, message):
+    try:
+        with Session(engine) as session, session.begin():
+            operation = session.query(model.Operation).get(operation_id)
+
+            operation.state = state
+            operation.message = message
+
+            session.commit()
+    except Exception as ex:
+        print(f"Error al guardar el estado {state} en Operation {operation_id}")
+        print(ex)
+        traceback.print_stack()
+
+
+def save_operation(operation_dict: Dict) -> int:
     try:
         with Session(engine) as session:
             with session.begin():
@@ -338,16 +414,18 @@ def save_operation(operation_dict: Dict) -> int:
 
     return operation_id
 
-def save_spot_order(spot_order_dict: Dict):
+
+def save_spot_order(engine, spot_order_dict: Dict):
+    spot_order_id = None
 
     try:
         with Session(engine) as session:
             with session.begin():
 
-                spot_order_id = spot_order_dict.get('spot_order_id')
+                orderId = spot_order_dict.get('orderId')
 
-                if spot_order_id:
-                    spot_order = session.query(model.SpotOrder).get(spot_order_id)
+                if orderId:
+                    spot_order = session.query(model.SpotOrder).filter_by(order_id=orderId).first()
                 else:
                     spot_order = model.SpotOrder()
                     session.add(spot_order)
@@ -362,16 +440,18 @@ def save_spot_order(spot_order_dict: Dict):
 
     return spot_order_id
 
-def save_spot_trade(spot_trade_dict: Dict):
+
+def save_spot_trade(engine, spot_trade_dict: Dict):
+    spot_trade_id = None
 
     try:
         with Session(engine) as session:
             with session.begin():
 
-                spot_trade_id = spot_trade_dict.get('spot_trade_id')
+                trade_id = spot_trade_dict.get('id')
 
-                if spot_trade_id:
-                    spot_trade = session.query(model.SpotTrade).get(spot_trade_id)
+                if trade_id:
+                    spot_trade = session.query(model.SpotTrade).filter_by(binance_id=trade_id).first()
                 else:
                     spot_trade = model.SpotTrade()
                     session.add(spot_trade)
@@ -386,13 +466,13 @@ def save_spot_trade(spot_trade_dict: Dict):
 
     return spot_trade_id
 
+
 def save_transfer(transfer: Dict):
     transfer_id = None
 
     try:
         with Session(engine) as session:
             with session.begin():
-
                 transfer = model.Transfer(
                     operation_id=transfer['operation_id'],
                     tran_id=transfer['tranId'],
@@ -411,16 +491,21 @@ def save_transfer(transfer: Dict):
 
     return transfer_id
 
-def save_future_order(future_order_dict: Dict):
+
+def save_future_order(engine, future_order_dict: Dict):
+    future_order_id = None
 
     try:
         with Session(engine) as session:
             with session.begin():
 
-                future_order_id = future_order_dict.get('future_order_id')
+                order_id = future_order_dict.get('orderId')
 
-                if future_order_id:
-                    future_order = session.query(model.FutureOrder).get(future_order_id)
+                if not order_id:
+                    order_id = future_order_dict.get('i')
+
+                if order_id:
+                    future_order = session.query(model.FutureOrder).filter_by(order_id=order_id).first()
                 else:
                     future_order = model.FutureOrder()
                     session.add(future_order)
@@ -435,16 +520,21 @@ def save_future_order(future_order_dict: Dict):
 
     return future_order_id
 
-def save_future_trade(future_trade_dict: Dict):
+
+def save_future_trade(engine, future_trade_dict: Dict):
+    future_trade_id = None
 
     try:
         with Session(engine) as session:
             with session.begin():
 
-                future_trade_id = future_trade_dict.get('future_trade_id')
+                trade_id = future_trade_dict.get('trade_id')
 
-                if future_trade_id:
-                    future_trade = session.query(model.FutureTrade).get(future_trade_id)
+                if not trade_id:
+                    trade_id = future_trade_dict.get('t')
+
+                if trade_id:
+                    future_trade = session.query(model.FutureTrade).filter_by(binance_id=trade_id).first()
                 else:
                     future_trade = model.FutureTrade()
                     session.add(future_trade)
@@ -480,10 +570,10 @@ def del_row(last_date, conn, tabla='spot_historical'):
     query = f'DELETE FROM {tabla} WHERE `id`={id}'
     conn.execute(query)
 
+
 def save_current_signal(symbol, data):
     from datetime import datetime
     with Session(engine) as session, session.begin():
-
         save_current = session.query(model.CurrentSignal).get(symbol)
 
         if not save_current:
@@ -495,7 +585,6 @@ def save_current_signal(symbol, data):
 
 
 def get_data_ratio(engine, ticker, quantity):
-
     conn = engine
 
     query = 'select avg(year_ratio) avg_year_ratio from ' \
@@ -506,9 +595,9 @@ def get_data_ratio(engine, ticker, quantity):
 
     return res
 
+
 def save_avg_ratio(engine, symbol, attribute, ratio):
     with Session(engine) as session, session.begin():
-
         current_signal = session.query(model.CurrentSignal).get(symbol)
 
         if not current_signal:
@@ -517,5 +606,185 @@ def save_avg_ratio(engine, symbol, attribute, ratio):
 
         setattr(current_signal, attribute, ratio)
 
+
+def sync_future_balances(engine, future_balances):
+    with Session(engine) as session, session.begin():
+        for future_balance_dict in future_balances:
+            asset = future_balance_dict['a']
+
+            future_balance: model.FutureBalance = session.query(model.FutureBalance).get(asset)
+
+            if not future_balance:
+                future_balance = model.FutureBalance(asset=asset)
+                session.add(future_balance)
+
+            future_balance.wallet_balance = future_balance_dict['wb']
+            future_balance.cross_wallet_balance = future_balance_dict['cw']
+            future_balance.balance_change = future_balance_dict['bc']
+
+            if future_balance.cross_wallet_balance != future_balance_dict['cw']:
+                future_balance.outdated = False
+
+
+def sync_spot_balances(engine, spot_balances):
+    with Session(engine) as session, session.begin():
+        for spot_balance_dict in spot_balances:
+            asset = spot_balance_dict['a']
+
+            spot_balance: model.SpotBalance = session.query(model.SpotBalance).get(asset)
+
+            if not spot_balance:
+                spot_balance = model.SpotBalance(asset=asset)
+                session.add(spot_balance)
+
+            if spot_balance.free != spot_balance_dict['f']:
+                spot_balance.outdated = False
+
+            spot_balance.free = spot_balance_dict['f']
+            spot_balance.locked = spot_balance_dict['l']
+
+
+def sync_future_positions(engine, future_positions):
+    with Session(engine) as session, session.begin():
+        for future_position_dict in future_positions:
+
+            symbol = future_position_dict['s']
+
+            future_position: model.FuturePosition = session.query(model.FuturePosition).get(symbol)
+
+            if not future_position:
+                future_position = model.FuturePosition(symbol=symbol)
+                session.add(future_position)
+
+            future_position.position_amount = future_position_dict['pa']
+            future_position.entry_price = future_position_dict['ep']
+            future_position.accumulated_realized = future_position_dict['cr']
+            future_position.unrealized_pnl = future_position_dict['up']
+            future_position.margin_type = future_position_dict['mt']
+            future_position.isolated_wallet = future_position_dict['iw']
+            future_position.position_side = future_position_dict['ps']
+            future_position.margin_asset = future_position_dict['ma']
+
+
+def check_config():
+    with Session(engine) as session, session.begin():
+        min_operation_value = session.query(model.Configuration).get("min_operation_value")
+
+        if not min_operation_value:
+            min_operation_value = model.Configuration(name="min_operation_value", value=2)
+            session.add(min_operation_value)
+
+        max_operation_value = session.query(model.Configuration).get("max_operation_value")
+
+        if not max_operation_value:
+            max_operation_value = model.Configuration(name="max_operation_value", value=30)
+            session.add(max_operation_value)
+
+        min_position_margin = session.query(model.Configuration).get("min_position_margin")
+
+        if not min_position_margin:
+            min_position_margin = model.Configuration(name="min_position_margin", value=0.5)
+            session.add(min_position_margin)
+
+        min_year_ratio = session.query(model.Configuration).get("min_year_ratio")
+
+        if not min_year_ratio:
+            min_year_ratio = model.Configuration(name="min_year_ratio", value=10)
+            session.add(min_year_ratio)
+
+        min_direct_ratio = session.query(model.Configuration).get("min_direct_ratio")
+
+        if not min_direct_ratio:
+            min_direct_ratio = model.Configuration(name="min_direct_ratio", value=0.5)
+            session.add(min_direct_ratio)
+
+
+def get_pending_transfers():
+    pending_transfers = []
+
+    with Session(engine) as session, session.begin():
+        future_operations = session.query(model.Operation). \
+            join(model.Operation.future_relation). \
+            join(model.Future.balance). \
+            filter(model.Operation.kind == 'CLOSE'). \
+            filter(model.Operation.state == 'FUTURE_BUY'). \
+            filter(model.FutureBalance.outdated == False). \
+            all()
+
+        if len(future_operations):
+            for future_operarion in future_operations:
+                transfer = {
+                    'operation_id': future_operarion.id,
+                    'type': 'CMFUTURE_MAIN',
+                    'asset': future_operarion.future_relation.base_asset,
+                    'amount': utils.get_quantity_rounded(
+                        future_operarion.future_relation.balance.cross_wallet_balance,
+                        future_operarion.spot_relation.tick_size
+                    ),
+                    'next_state': 'FUTURE_TRANSFER'
+                }
+
+                pending_transfers.append(transfer)
+        else:
+            spot_orders = session.query(model.SpotOrder). \
+                join(model.SpotOrder.operation). \
+                join(model.SpotOrder.spot). \
+                filter(model.Operation.state == 'SPOT_BUY'). \
+                filter(model.SpotOrder.status == 'FILLED'). \
+                all()
+
+            # OPEN_POSITION_TRANSFER_TYPE = 'MAIN_CMFUTURE'
+            # CLOSE_POSITION_TRANSFER_TYPE = 'CMFUTURE_MAIN'
+
+            for spot_order in spot_orders:
+                transfer = {
+                    'operation_id': spot_order.operation_id,
+                    'type': 'MAIN_CMFUTURE',
+                    'asset': spot_order.spot.base_asset,
+                    'amount': spot_order.executed_qty,
+                    'next_state': 'SPOT_TRANSFER'
+                }
+
+                pending_transfers.append(transfer)
+
+    return pending_transfers
+
+
+def get_operations_to_sell_futures():
+    results = []
+
+    with Session(engine) as session, session.begin():
+        operations = session.query(model.Operation).filter_by(state='SPOT_TRANSFER').all()
+
+        for operation in operations:
+            results.append({
+                'operation_id': operation.id,
+                'future_symbol': operation.future,
+                'contract_qty': operation.contract_qty
+            })
+
+    return results
+
+def get_operations_to_sell_spots():
+    results = []
+
+    with Session(engine) as session, session.begin():
+        operations = session.query(model.Operation).\
+            join(model.Operation.transfer).\
+            filter(model.Operation.state == 'FUTURE_TRANSFER').all()
+
+        for operation in operations:
+            results.append({
+                'operation_id': operation.id,
+                'spot_symbol': operation.spot,
+                'qty': utils.get_quantity_rounded(
+                    operation.transfer.amount,
+                    operation.spot_relation.tick_size
+                )
+            })
+
+    return results
+
 if __name__ == '__main__':
-    print(get_current_ratios())
+    print(get_current_operations_to_close())
+

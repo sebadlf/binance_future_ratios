@@ -11,6 +11,15 @@ import keys
 # declarative base class
 Base = declarative_base()
 
+class Configuration(Base):
+    __tablename__ = 'configuration'
+
+    name = Column(String(20), primary_key=True)
+    value = Column(Float)
+
+    inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
+    updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
+
 # an example mapping using the base
 class Future(Base):
     __tablename__ = 'future'
@@ -28,13 +37,19 @@ class Future(Base):
     contract_status = Column(String(20))
     contract_size = Column(Integer)
 
+    base_asset = Column(String(10), unique=True)
+    quote_asset = Column(String(10))
+
+    operations = relationship("Operation", back_populates="future_relation")
+
     future_price = relationship("FuturePrice", uselist=False, back_populates="future")
+    balance = relationship("FutureBalance", uselist=False, back_populates="future")
 
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # __table_args__ = (
-    #     Index('symbol', symbol),
+    #     Index('base_asset', base_asset),
     # )
 
 class Spot(Base):
@@ -49,7 +64,11 @@ class Spot(Base):
     max_price = Column(Float)
     tick_size = Column(Float)
 
+    operations = relationship("Operation", back_populates="spot_relation")
+
     spot_price = relationship("SpotPrice", uselist=False, back_populates="spot")
+
+    spot_orders = relationship("SpotOrder", back_populates="spot")
 
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -206,6 +225,8 @@ class Position(Base):
 
     id = Column(Integer, primary_key=True)
 
+    uuid = Column(String(36))
+
     future = Column(String(20), ForeignKey('future.symbol'))
     future_price = Column(Float)
 
@@ -231,6 +252,8 @@ class Position(Base):
     state = Column(String(20))
     message = Column(String(200))
 
+    operations = relationship("Operation", back_populates="position")
+
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -240,13 +263,18 @@ class Operation(Base):
     id = Column(Integer, primary_key=True)
 
     position_id = Column(Integer, ForeignKey('position.id'))
+    position = relationship("Position", back_populates="operations")
 
     kind = Column(String(10))
 
     future = Column(String(20), ForeignKey('future.symbol'))
+    future_relation = relationship("Future", back_populates="operations")
+
     future_price = Column(Float)
 
     spot = Column(String(20), ForeignKey('spot.symbol'))
+    spot_relation = relationship("Spot", back_populates="operations")
+
     spot_price = Column(Float)
 
     direct_ratio = Column(Float)
@@ -258,6 +286,8 @@ class Operation(Base):
     year_ratio = Column(Float)
 
     contract_size = Column(Integer)
+    contract_qty = Column(Integer)
+
     buy_per_contract = Column(Float)
 
     tick_size = Column(Float)
@@ -265,6 +295,12 @@ class Operation(Base):
 
     state = Column(String(20))
     message = Column(String(200))
+
+    close_reason = Column(String(200))
+
+    spot_order = relationship("SpotOrder", back_populates="operation", uselist=False)
+    future_order = relationship("FutureOrder", back_populates="operation", uselist=False)
+    transfer = relationship("Transfer", back_populates="operation", uselist=False)
 
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -275,6 +311,7 @@ class Transfer(Base):
     id = Column(Integer, primary_key=True)
 
     operation_id = Column(Integer, ForeignKey('operation.id'))
+    operation = relationship("Operation", back_populates="transfer")
 
     tran_id = Column(BigInteger)
 
@@ -290,17 +327,32 @@ class Transfer(Base):
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class SpotBalance(Base):
+    __tablename__ = 'spot_balance'
+
+    asset = Column(String(20), primary_key=True)
+
+    free = Column(Float)
+    locked = Column(Float)
+    outdated = Column(Boolean, default=False)
+
+    inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
+    updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class SpotOrder(Base):
     __tablename__ = 'spot_order'
 
     id = Column(Integer, primary_key=True)
 
     operation_id = Column(Integer, ForeignKey('operation.id'))
+    operation = relationship("Operation", back_populates="spot_order")
 
     symbol = Column(String(20), ForeignKey('spot.symbol'))
+    spot = relationship("Spot", back_populates="spot_orders")
+
     order_id = Column(BigInteger)
     order_list_id = Column(BigInteger)
-    client_order_id = Column(String(22))
+    client_order_id = Column(String(36))
     transact_timestamp = Column(BigInteger)
     transact_time = Column(DATETIME)
     price = Column(Float)
@@ -367,13 +419,14 @@ class FutureOrder(Base):
     id = Column(Integer, primary_key=True)
 
     operation_id = Column(Integer, ForeignKey('operation.id'))
+    operation = relationship("Operation", back_populates="future_order")
 
     symbol = Column(String(20), ForeignKey('future.symbol'))
 
     order_id = Column(BigInteger)
     pair = Column(String(20))
     status = Column(String(10))
-    client_order_id = Column(String(22))
+    client_order_id = Column(String(24))
     price = Column(Float)
     avg_price = Column(Float)
     orig_qty = Column(Float)
@@ -384,8 +437,6 @@ class FutureOrder(Base):
     time_in_force = Column(String(20))
     type = Column(String(20))
 
-    time_in_force = Column(String(20))
-    type = Column(String(20))
 
     reduce_only = Column(Boolean)
     close_position = Column(Boolean)
@@ -448,10 +499,15 @@ class FutureTrade(Base):
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class CurrentOperationToClose(Base):
-    __tablename__ = 'current_operation_to_close'
+    __tablename__ = 'current_operations_to_close'
 
     position_id = Column(Integer, primary_key=True)
-    operation_id = Column(Integer)
+
+    open_avg_direct_ratio = Column(Float)
+    open_avg_year_ratio = Column(Float)
+    direct_ratio_diff = Column(Float)
+    year_ratio_diff = Column(Float)
+
     future_symbol = Column(String(20))
     future_price = Column(Float)
     spot_symbol = Column(String(20))
@@ -467,12 +523,10 @@ class CurrentOperationToClose(Base):
     base_asset = Column(String(20))
     signal = Column(String(20))
     contract_qty = Column(Integer)
-    transfer_amount = Column(Float)
-    future_base_qty = Column(Float)
-    future_commission = Column(Float)
-    direct_ratio_diff = Column(Float)
-    year_ratio_diff = Column(Float)
+
     better_future_symbol = Column(String(20))
+    better_direct_ratio = Column(Float)
+    better_year_ratio = Column(Float)
 
 class CurrentSignal(Base):
     __tablename__ = 'current_signal'
@@ -487,9 +541,10 @@ class CurrentSignal(Base):
     hourly_avg_year_ratio = Column(Float)
     ten_minutes_avg_year_ratio = Column(Float)
 
-class CurrentRatios(Base):
-    __tablename__ = 'current_ratios'
+class CurrentOperationsToOpen(Base):
+    __tablename__ = 'current_operations_to_open'
 
+    position_id = Column(Integer)
     future_symbol = Column(String(20), primary_key=True)
     future_price = Column(Float)
     spot_symbol = Column(String(20), primary_key=True)
@@ -504,6 +559,8 @@ class CurrentRatios(Base):
     tick_size = Column(Float)
     base_asset = Column(String(20))
     signal = Column(String(20))
+    contract_qty = Column(Integer)
+    future_balance = Column(Float)
 
     current_signal = relationship(
         "CurrentSignal",
@@ -527,9 +584,40 @@ class HistoricalRatiosQuick(Base):
     hour_ratio = Column(Float)
     year_ratio = Column(Float)
 
+class FutureBalance(Base):
+    __tablename__ = 'future_balance'
+
+    asset = Column(String(20), ForeignKey('future.base_asset'), primary_key=True)
+    wallet_balance = Column(Float)
+    cross_wallet_balance = Column(Float)
+    balance_change = Column(Float)
+
+    future = relationship("Future", back_populates="balance")
+
+    outdated = Column(Boolean, default=False)
+
+    inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
+    updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class FuturePosition(Base):
+    __tablename__ = 'future_position'
+
+    symbol = Column(String(20), primary_key=True)
+    position_amount = Column(Integer)
+    entry_price = Column(Float)
+    accumulated_realized = Column(Float)
+    unrealized_pnl = Column(Float)
+    margin_type = Column(String(10))
+    isolated_wallet = Column(Float)
+    position_side = Column(String(10))
+    margin_asset = Column(String(15))
+
+    inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
+    updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
+
 engine = create_engine(keys.DB_CONNECTION)
 
-view_tables = ['current_ratios', 'current_operation_to_close']
+view_tables = ['current_operations_to_open', 'current_operations_to_close']
 
 real_tables = [table_value for (table_key, table_value) in Base.metadata.tables.items() if table_key not in view_tables]
 

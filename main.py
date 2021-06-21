@@ -9,7 +9,7 @@ import model_view
 
 import model_service
 
-from binance_service import binance_client, get_spot_trade, get_spot_order, init_leverages, filter_future_list, get_price_element
+from binance_service import binance_client, get_spot_trade, get_spot_order, filter_future_list, get_price_element
 
 import position_service
 import binance_service
@@ -26,9 +26,23 @@ from task_stock_bnb import task_stock_bnb, amount_ticker
 from task_avg_ratio import task_avg_ratio
 from task_spot_order_book import task_current_spot_order_book
 from task_futures_order_book import task_current_futures_order_book
+from task_account_update import task_account_update
+from task_operation_spot_buy import task_operation_spot_buy
+from task_operation_transfer import task_operation_transfer
+from task_operation_future_sell import task_operation_future_sell
+from task_operation_future_buy import task_operation_future_buy
+from task_operation_spot_sell import task_operation_spot_sell
 
 import utils
 
+
+def init_leverages():
+    for symbol in model_service.get_current_futures():
+        binance_client.futures_coin_change_leverage(symbol=symbol, leverage=1)
+        try:
+            binance_client.futures_coin_change_margin_type(symbol=symbol, marginType="ISOLATED")
+        except:
+            pass
 
 if __name__ == '__main__':
     model.create_tables()
@@ -82,47 +96,23 @@ if __name__ == '__main__':
     task_stock_bnb = Thread(name="task_stock_bnb", target=task_stock_bnb)
     task_stock_bnb.start()
 
-    time.sleep(10)
+    thread_account_update = Thread(name="task_account_update", target=task_account_update)
+    thread_account_update.start()
 
-    print("Start")
+    thread_operation_transfer = Thread(name="task_operation_transfer", target=task_operation_transfer)
+    thread_operation_transfer.start()
 
-    amount_usdt = amount_ticker("USDT")
+    thread_operation_spot_buy = Thread(name="task_operation_spot_buy", target=task_operation_spot_buy)
+    thread_operation_spot_buy.start()
 
-    while True and False:
+    thread_operation_spot_sell = Thread(name="task_operation_spot_sell", target=task_operation_spot_sell)
+    thread_operation_spot_sell.start()
 
-        if amount_usdt > 25:
-            positions_to_open = model_service.get_current_ratios()
+    thread_operation_future_buy = Thread(name="task_operation_future_buy", target=task_operation_future_buy)
+    thread_operation_future_buy.start()
 
-            if len(positions_to_open):
-                best_position = [row for row in model_service.get_current_ratios()][0]
+    thread_operation_future_sell = Thread(name="task_operation_future_sell", target=task_operation_future_sell)
+    thread_operation_future_sell.start()
 
-                print("Abro posición", best_position)
-
-                position_data = position_service.open_position(best_position)
-
-                print("position_data", position_data)
-
-                position_service.save_opened_position(position_data)
-
-                amount_usdt = amount_ticker("USDT")
-
-        ###########################
-
-        positions_to_close = model_service.get_current_operations_to_close()
-
-        if len(positions_to_close):
-            position_to_close = [row for row in model_service.get_current_operations_to_close()][0]
-
-            direct_ratio_diff = position_to_close['direct_ratio_diff']
-
-            print(f"Cierror posición con diff = {round(direct_ratio_diff, 4)}", position_to_close)
-
-            position_data = position_service.close_position(position_to_close)
-
-            print(position_data)
-
-            position_service.save_closed_position(position_data)
-
-            amount_usdt = amount_ticker("USDT")
 
 

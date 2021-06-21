@@ -5,13 +5,12 @@ import model_service
 import traceback
 import json
 
-MIN_NUMBER_OF_CONTRACTS = 2
-SPOT_BUY_OVERBUY_MARGIN = 1.02
 OPEN_POSITION_TRANSFER_TYPE = 'MAIN_CMFUTURE'
 CLOSE_POSITION_TRANSFER_TYPE = 'CMFUTURE_MAIN'
 
 import utils
 
+import config
 import keys
 from binance.client import Client
 
@@ -32,8 +31,9 @@ def open_position(position_dict: Dict):
         buy_per_contract = position_dict['buy_per_contract']
         tick_size = position_dict['tick_size']
         base_asset = position_dict['base_asset']
+        contract_qty = position_dict['contract_qty']
 
-        quantity_to_buy = buy_per_contract * SPOT_BUY_OVERBUY_MARGIN * MIN_NUMBER_OF_CONTRACTS
+        quantity_to_buy = buy_per_contract * config.SPOT_BUY_OVERBUY_MARGIN * contract_qty
         quantity_to_buy = utils.get_quantity_rounded(quantity_to_buy, tick_size)
 
         spot_order = binance_client.order_market_buy(symbol=spot_symbol, quantity=quantity_to_buy)
