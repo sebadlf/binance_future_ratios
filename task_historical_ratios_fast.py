@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 engine = model.get_engine()
 
-def task_historical_ratios_quick():
+def task_historical_ratios_fast():
     engine.dispose()
 
     time.sleep(30)
@@ -31,7 +31,7 @@ def task_historical_ratios_quick():
         try:
 
             with Session(engine) as session, session.begin():
-                current_ratios = session.query(model.CurrentOperationsToOpen).all()
+                current_ratios = session.query(model.CurrentRatiosOpen).all()
 
                 for current_ratio in current_ratios:
                     ratio = model.HistoricalRatiosQuick()

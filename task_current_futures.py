@@ -17,3 +17,7 @@ def task_current_futures():
             pass
 
         time.sleep(60)
+
+
+if __name__ == '__main__':
+    task_current_futures()

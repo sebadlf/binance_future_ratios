@@ -4,7 +4,7 @@ from keys import api_key, api_secret
 
 import traceback
 
-import model_service
+# import model_service
 
 binance_client = Client(api_key, api_secret)
 
@@ -70,10 +70,6 @@ def get_future_trade(symbol, order_id, qty):
         trade = trades if len(trades) else None
 
     return trade
-
-def init_leverages():
-    for symbol in model_service.get_current_futures():
-        binance_client.futures_coin_change_leverage(symbol=symbol, leverage=1)
 
 if __name__ == '__main__':
     from datetime import datetime
