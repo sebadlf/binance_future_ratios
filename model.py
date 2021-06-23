@@ -527,6 +527,12 @@ class CurrentRatiosQuick(Base):
     hour_ratio = Column(Float)
     year_ratio = Column(Float)
 
+class MaxHistoricalRatio(Base):
+    __tablename__ = 'max_historical_ratio'
+
+    time = Column(DATETIME, primary_key=True)
+    monthly_ratio_avg = Column(Float)
+
 engine = create_engine(keys.DB_CONNECTION)
 
 view_tables = ['current_ratios', 'current_operation_to_close']

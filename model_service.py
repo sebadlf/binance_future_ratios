@@ -76,6 +76,7 @@ def sync_spot_prices(engine, spot_prices):
                 spot_price_db.bid_price = spot_price['b']
                 spot_price_db.bid_qty = spot_price['B']
 
+
 def sync_spot_prices_calc(engine, spot_prices):
     with Session(engine) as session, session.begin():
         for spot_price in spot_prices:
@@ -149,6 +150,7 @@ def sync_futures_prices(engine, futures_prices):
             future_price_db.bid_price = future_price['b']
             future_price_db.bid_qty = future_price['B']
 
+
 def sync_futures_prices_calc(engine, futures_prices):
     with Session(engine) as session, session.begin():
         for future_price in futures_prices:
@@ -172,18 +174,17 @@ def get_current_ratios():
     #             filter(model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio).\
 
     with Session(engine) as session, session.begin():
-        future_ratios = session.query(model.CurrentRatios).join(model.CurrentRatios.current_signal).\
-            filter(model.CurrentRatios.year_ratio > config.MIN_YEAR_MARGIN).\
-            filter(model.CurrentRatios.spot_symbol != "BTCUSDT").\
+        future_ratios = session.query(model.CurrentRatios).join(model.CurrentRatios.current_signal). \
+            filter(model.CurrentRatios.year_ratio > config.MIN_YEAR_MARGIN). \
+            filter(model.CurrentRatios.spot_symbol != "BTCUSDT"). \
             filter(model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio). \
             filter(model.CurrentSignal.six_hours_avg_year_ratio > model.CurrentSignal.daily_avg_year_ratio). \
-            filter(model.CurrentSignal.hourly_avg_year_ratio > model.CurrentSignal.six_hours_avg_year_ratio).\
+            filter(model.CurrentSignal.hourly_avg_year_ratio > model.CurrentSignal.six_hours_avg_year_ratio). \
             filter(model.CurrentSignal.ten_minutes_avg_year_ratio > model.CurrentSignal.hourly_avg_year_ratio). \
-            filter(model.CurrentRatios.signal == 'open').\
+            filter(model.CurrentRatios.signal == 'open'). \
             all()
 
         for future_ratio in future_ratios:
-
             futures_info.append({
                 'future_symbol': future_ratio.future_symbol,
                 'future_price': future_ratio.future_price,
@@ -207,14 +208,12 @@ def get_current_ratios():
 def get_current_operations_to_close():
     futures_info = []
 
-
     with Session(engine) as session, session.begin():
         current_operation_to_close = session.query(model.CurrentOperationToClose). \
-            filter(model.CurrentOperationToClose.signal == 'close').\
+            filter(model.CurrentOperationToClose.signal == 'close'). \
             filter(model.CurrentOperationToClose.direct_ratio_diff > 0.5).all()
 
         for operation_to_close in current_operation_to_close:
-
             futures_info.append({
                 'position_id': operation_to_close.position_id,
                 'operation_id': operation_to_close.operation_id,
@@ -245,6 +244,7 @@ def get_current_operations_to_close():
             })
 
         return futures_info
+
 
 def save_historical_data_spot(engine, symbol, historical_data):
     with Session(engine) as session, session.begin():
@@ -303,6 +303,7 @@ def create_position(position_dict: Dict) -> model.Position:
 
     return position_id
 
+
 def change_position_state(position_id, state):
     try:
         with Session(engine) as session, session.begin():
@@ -314,8 +315,8 @@ def change_position_state(position_id, state):
         print(ex)
         traceback.print_stack()
 
-def save_operation(operation_dict: Dict) -> int:
 
+def save_operation(operation_dict: Dict) -> int:
     try:
         with Session(engine) as session:
             with session.begin():
@@ -338,8 +339,8 @@ def save_operation(operation_dict: Dict) -> int:
 
     return operation_id
 
-def save_spot_order(spot_order_dict: Dict):
 
+def save_spot_order(spot_order_dict: Dict):
     try:
         with Session(engine) as session:
             with session.begin():
@@ -362,8 +363,8 @@ def save_spot_order(spot_order_dict: Dict):
 
     return spot_order_id
 
-def save_spot_trade(spot_trade_dict: Dict):
 
+def save_spot_trade(spot_trade_dict: Dict):
     try:
         with Session(engine) as session:
             with session.begin():
@@ -386,13 +387,13 @@ def save_spot_trade(spot_trade_dict: Dict):
 
     return spot_trade_id
 
+
 def save_transfer(transfer: Dict):
     transfer_id = None
 
     try:
         with Session(engine) as session:
             with session.begin():
-
                 transfer = model.Transfer(
                     operation_id=transfer['operation_id'],
                     tran_id=transfer['tranId'],
@@ -411,8 +412,8 @@ def save_transfer(transfer: Dict):
 
     return transfer_id
 
-def save_future_order(future_order_dict: Dict):
 
+def save_future_order(future_order_dict: Dict):
     try:
         with Session(engine) as session:
             with session.begin():
@@ -435,8 +436,8 @@ def save_future_order(future_order_dict: Dict):
 
     return future_order_id
 
-def save_future_trade(future_trade_dict: Dict):
 
+def save_future_trade(future_trade_dict: Dict):
     try:
         with Session(engine) as session:
             with session.begin():
@@ -480,10 +481,10 @@ def del_row(last_date, conn, tabla='spot_historical'):
     query = f'DELETE FROM {tabla} WHERE `id`={id}'
     conn.execute(query)
 
+
 def save_current_signal(symbol, data):
     from datetime import datetime
     with Session(engine) as session, session.begin():
-
         save_current = session.query(model.CurrentSignal).get(symbol)
 
         if not save_current:
@@ -495,7 +496,6 @@ def save_current_signal(symbol, data):
 
 
 def get_data_ratio(engine, ticker, quantity):
-
     conn = engine
 
     query = 'select avg(year_ratio) avg_year_ratio from ' \
@@ -506,9 +506,9 @@ def get_data_ratio(engine, ticker, quantity):
 
     return res
 
+
 def save_avg_ratio(engine, symbol, attribute, ratio):
     with Session(engine) as session, session.begin():
-
         current_signal = session.query(model.CurrentSignal).get(symbol)
 
         if not current_signal:
@@ -516,6 +516,21 @@ def save_avg_ratio(engine, symbol, attribute, ratio):
             session.add(current_signal)
 
         setattr(current_signal, attribute, ratio)
+
+
+def save_max_historical_ratio(time, data):
+
+    with Session(engine) as session, session.begin():
+        save_data = session.query(model.MaxHistoricalRatio).get(time)
+        print(save_data)
+
+        if save_data is None:
+            save_data = model.MaxHistoricalRatio(time=time)
+            session.add(save_data)
+
+        save_data.time = time
+        save_data.monthly_ratio_avg = data
+
 
 if __name__ == '__main__':
     print(get_current_ratios())
