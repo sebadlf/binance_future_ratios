@@ -790,7 +790,6 @@ def save_max_historical_ratio(time, data):
 
     with Session(engine) as session, session.begin():
         save_data = session.query(model.MaxHistoricalRatio).get(time)
-        print(save_data)
 
         if save_data is None:
             save_data = model.MaxHistoricalRatio(time=time)
@@ -801,4 +800,4 @@ def save_max_historical_ratio(time, data):
 
 
 if __name__ == '__main__':
-    print(get_current_ratios())
+    pass
