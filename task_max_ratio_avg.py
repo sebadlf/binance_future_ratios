@@ -25,5 +25,8 @@ def task_max_historical_ratio(table='historical_ratios', k=43200):
 
         time.sleep(25)
 
-prueba = task_max_historical_ratio()
-print(prueba)
+
+if __name__ == '__main__':
+    prueba = task_max_historical_ratio()
+    print(prueba)
+
