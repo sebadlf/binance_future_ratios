@@ -32,6 +32,7 @@ from task_operation_transfer import task_operation_transfer
 from task_operation_future_sell import task_operation_future_sell
 from task_operation_future_buy import task_operation_future_buy
 from task_operation_spot_sell import task_operation_spot_sell
+from task_max_ratio_avg import task_max_historical_ratio
 
 import utils
 
@@ -115,6 +116,9 @@ if __name__ == '__main__':
     #
     # thread_operation_future_sell = Thread(name="task_operation_future_sell", target=task_operation_future_sell)
     # thread_operation_future_sell.start()
+
+    thread_operation_max_historical_ratio = Thread(name="task_max_historical_ratio", target=task_max_historical_ratio)
+    thread_operation_max_historical_ratio.start()
 
 
 

@@ -788,6 +788,19 @@ def get_operations_to_sell_spots():
 
     return results
 
-if __name__ == '__main__':
-    print(get_current_operations_to_close())
 
+def save_max_historical_ratio(time, data):
+
+    with Session(engine) as session, session.begin():
+        save_data = session.query(model.MaxHistoricalRatio).get(time)
+
+        if save_data is None:
+            save_data = model.MaxHistoricalRatio(time=time)
+            session.add(save_data)
+
+        save_data.time = time
+        save_data.monthly_ratio_avg = data
+
+
+if __name__ == '__main__':
+    pass

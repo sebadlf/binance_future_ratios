@@ -617,6 +617,12 @@ class FuturePosition(Base):
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class MaxHistoricalRatio(Base):
+    __tablename__ = 'max_historical_ratio'
+
+    time = Column(DATETIME, primary_key=True)
+    monthly_ratio_avg = Column(Float)
+
 engine = create_engine(keys.DB_CONNECTION)
 
 view_tables = ['current_operations_to_open', 'current_operations_to_close']
