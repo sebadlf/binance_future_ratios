@@ -102,6 +102,9 @@ if __name__ == '__main__':
     task_stock_bnb = Thread(name="task_stock_bnb", target=task_stock_bnb)
     task_stock_bnb.start()
 
+    thread_operation_max_historical_ratio = Thread(name="task_max_historical_ratio", target=task_max_historical_ratio)
+    thread_operation_max_historical_ratio.start()
+
     # thread_operation_transfer = Thread(name="task_operation_transfer", target=task_operation_transfer)
     # thread_operation_transfer.start()
     #
@@ -116,9 +119,5 @@ if __name__ == '__main__':
     #
     # thread_operation_future_sell = Thread(name="task_operation_future_sell", target=task_operation_future_sell)
     # thread_operation_future_sell.start()
-
-    thread_operation_max_historical_ratio = Thread(name="task_max_historical_ratio", target=task_max_historical_ratio)
-    thread_operation_max_historical_ratio.start()
-
 
 
