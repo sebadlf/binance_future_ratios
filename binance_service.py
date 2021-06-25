@@ -74,9 +74,16 @@ def get_future_trade(symbol, order_id, qty):
 if __name__ == '__main__':
     from datetime import datetime
 
+    binance_client = Client(api_key, api_secret, testnet=True)
+
     start = datetime.utcnow()
 
-    print(binance_client.get_order_book(symbol="DOTUSDT", limit=5))
-    print(binance_client.get_orderbook_tickers())
+    # print(binance_client.get_order_book(symbol="DOTUSDT", limit=5))
+
+    # [print(book) for book in binance_client.get_orderbook_tickers()]
+
+
+    print(binance_client.get_account_snapshot(type='SPOT'))
 
     print(datetime.utcnow() - start)
+

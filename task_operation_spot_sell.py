@@ -13,27 +13,22 @@ import model_helper
 def save_spot_sell(spot_order: Dict):
     spot_sell_id = None
 
-    try:
-        with Session(model.get_engine()) as session:
-            with session.begin():
-                operation_id = spot_order['operation_id']
+    with Session(model.get_engine()) as session:
+        with session.begin():
+            operation_id = spot_order['operation_id']
 
-                operation = session.query(model.Operation).get(operation_id)
+            operation = session.query(model.Operation).get(operation_id)
 
-                operation.state = 'SPOT_SELL'
+            operation.state = 'SPOT_SELL'
 
-                operation.position.state = 'CLOSING'
+            operation.position.state = 'CLOSING'
 
-                spot_sell = model_helper.sync_spot_order(spot_order)
+            # spot_sell = model_helper.sync_spot_order(spot_order)
 
-                operation.spot_order = spot_sell
+            # operation.spot_order = spot_sell
 
-            spot_sell_id = spot_sell.id
+        # spot_sell_id = spot_sell.id
 
-    except Exception as ex:
-        print(f"Error al guardar Venta de spot = {spot_order}")
-        print(ex)
-        traceback.print_stack()
 
     return spot_sell_id
 
@@ -72,7 +67,13 @@ def task_operation_spot_sell():
             )
 
 if __name__ == '__main__':
-    task_operation_spot_sell()
+    print(model_service.get_operations_to_sell_spots())
+
+    save_spot_sell({'operation_id': 51, 'spot_symbol': 'LINKUSDT', 'qty': 4.094})
+
+    print(model_service.get_operations_to_sell_spots())
+
+    # task_operation_spot_sell()
 
     import binance_service
 

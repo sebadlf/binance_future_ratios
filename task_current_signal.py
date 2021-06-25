@@ -26,6 +26,8 @@ def task_current_signal(sma = config.SMA, ema = config.EMA, table = 'historical_
                 sma_value = utils.sma(data = data, k = sma)
                 ema_value = utils.ema(data = data, k = ema)
 
+                print(ticker, sma_value, ema_value)
+
                 if ema_value and sma_value:
                     if ema_value <= sma_value:
                         resultado = 'open'
@@ -40,3 +42,6 @@ def task_current_signal(sma = config.SMA, ema = config.EMA, table = 'historical_
                 print(f'error con {ticker}')
 
         time.sleep(15)
+
+if __name__ == '__main__':
+    task_current_signal()

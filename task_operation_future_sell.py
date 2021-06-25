@@ -10,26 +10,30 @@ from sqlalchemy.orm import Session
 
 import model_helper
 
-def save_future_sell(future_order: Dict):
+def save_future_sell(future_order_dict: Dict):
     future_sell_id = None
 
     try:
         with Session(model.get_engine()) as session:
             with session.begin():
-                operation_id = future_order['operation_id']
+                operation_id = future_order_dict['operation_id']
 
                 operation = session.query(model.Operation).get(operation_id)
 
                 operation.state = 'FUTURE_SELL'
 
-                future_sell = model_helper.sync_future_order(future_order)
+                order_id = future_order_dict['orderId']
+
+                future_order = session.query(model.FutureOrder).filter_by(order_id=order_id).first()
+
+                future_sell = model_helper.sync_future_order(future_order_dict, future_order)
 
                 operation.future_order = future_sell
 
             future_sell_id = future_sell.id
 
     except Exception as ex:
-        print(f"Error al guardar Venta de futuro = {future_order}")
+        print(f"Error al guardar Venta de futuro = {future_order_dict}")
         print(ex)
         traceback.print_stack()
 
@@ -74,13 +78,19 @@ if __name__ == '__main__':
 
     #task_future_sell()
 
-    # import binance_service
-    #
-    # future_order = binance_service.get_future_order('BCHUSD_210924', '191648084')
-    #
-    # save_future_sell({
-    #     'operation_id': 1,
-    #     **future_order
-    # })
+    import binance_service
 
+    future_order = binance_service.get_future_order('BTCUSD_210924', '729382408')
+
+    save_future_sell({
+        'operation_id': 52,
+        **future_order
+    })
+
+    future_order = binance_service.get_future_order('BTCUSD_210924', '729383052')
+
+    save_future_sell({
+        'operation_id': 53,
+        **future_order
+    })
 

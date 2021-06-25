@@ -91,7 +91,7 @@ current_operations_to_open = '''
     JOIN 		configuration c2
     ON			c2.name = 'max_operation_value'
     JOIN 		spot_balance sb
-    ON			sb.asset='USDT'
+    ON			sb.asset='USDT' and sb.outdated = 0
     JOIN		spot s
     ON			cr.spot_symbol = s.symbol
     JOIN 		future_balance fb

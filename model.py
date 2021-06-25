@@ -37,7 +37,7 @@ class Future(Base):
     contract_status = Column(String(20))
     contract_size = Column(Integer)
 
-    base_asset = Column(String(10), unique=True)
+    base_asset = Column(String(10))
     quote_asset = Column(String(10))
 
     operations = relationship("Operation", back_populates="future_relation")
@@ -48,9 +48,9 @@ class Future(Base):
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # __table_args__ = (
-    #     Index('base_asset', base_asset),
-    # )
+    __table_args__ = (
+        Index('base_asset', base_asset),
+    )
 
 class Spot(Base):
     __tablename__ = 'spot'
@@ -70,12 +70,14 @@ class Spot(Base):
 
     spot_orders = relationship("SpotOrder", back_populates="spot")
 
+    balance = relationship("SpotBalance", uselist=False, back_populates="spot")
+
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # __table_args__ = (
-    #     Index('symbol', symbol),
-    # )
+    __table_args__ = (
+        Index('base_asset', base_asset),
+    )
 
 class SpotPrice(Base):
     __tablename__ = 'spot_price'
@@ -225,8 +227,6 @@ class Position(Base):
 
     id = Column(Integer, primary_key=True)
 
-    uuid = Column(String(36))
-
     future = Column(String(20), ForeignKey('future.symbol'))
     future_price = Column(Float)
 
@@ -330,11 +330,13 @@ class Transfer(Base):
 class SpotBalance(Base):
     __tablename__ = 'spot_balance'
 
-    asset = Column(String(20), primary_key=True)
+    asset = Column(String(20), ForeignKey('spot.base_asset'), primary_key=True)
 
     free = Column(Float)
     locked = Column(Float)
     outdated = Column(Boolean, default=False)
+
+    spot = relationship("Spot", back_populates="balance")
 
     inserted = Column(DATETIME(fsp=6), default=datetime.utcnow)
     updated = Column(DATETIME(fsp=6), default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -350,7 +352,7 @@ class SpotOrder(Base):
     symbol = Column(String(20), ForeignKey('spot.symbol'))
     spot = relationship("Spot", back_populates="spot_orders")
 
-    order_id = Column(BigInteger)
+    order_id = Column(BigInteger, unique=True)
     order_list_id = Column(BigInteger)
     client_order_id = Column(String(36))
     transact_timestamp = Column(BigInteger)
@@ -393,7 +395,7 @@ class SpotTrade(Base):
 
     symbol = Column(String(20), ForeignKey('spot.symbol'))
 
-    binance_id = Column(BigInteger)
+    binance_id = Column(BigInteger, unique=True)
     order_id = Column(BigInteger)
     order_list_id = Column(BigInteger)
     price = Column(Float)
@@ -423,7 +425,7 @@ class FutureOrder(Base):
 
     symbol = Column(String(20), ForeignKey('future.symbol'))
 
-    order_id = Column(BigInteger)
+    order_id = Column(BigInteger, unique=True)
     pair = Column(String(20))
     status = Column(String(10))
     client_order_id = Column(String(24))
@@ -475,7 +477,7 @@ class FutureTrade(Base):
 
     symbol = Column(String(20), ForeignKey('future.symbol'))
 
-    binance_id = Column(BigInteger)
+    binance_id = Column(BigInteger, unique=True)
     order_id = Column(BigInteger)
     pair = Column(String(20))
     side = Column(String(10))

@@ -190,6 +190,10 @@ def sync_future_order(future_order_dict, future_order=None):
     if future_order_dict.get('operation_id'):
         future_order.operation_id = future_order_dict['operation_id']
 
+    if future_order.status == 'FILLED':
+        print(f"La orden {future_order.order_id} ya se encuentra grabada")
+        return future_order
+
     future_order.order_id = get_value(future_order_dict, 'orderId', 'i', future_order.order_id)
     future_order.symbol = get_value(future_order_dict, 'symbol', 's', future_order.symbol)
     future_order.pair = get_value(future_order_dict, 'pair', 'not-implemented', future_order.pair)

@@ -14,7 +14,7 @@ def task_current_futures():
             futures = binance_client.futures_coin_exchange_info()
             sync_futures(engine, futures['symbols'])
         except Exception as ex:
-            pass
+            print(ex)
 
         time.sleep(60)
 

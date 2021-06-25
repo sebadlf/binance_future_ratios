@@ -41,7 +41,6 @@ def save_operation_buy_spot(position_dict, spot_order_dict):
                 'state': 'CREATED'
             }, position)
 
-
             if not operation:
                 operation = model.Operation()
 
@@ -55,9 +54,10 @@ def save_operation_buy_spot(position_dict, spot_order_dict):
                 'state': 'SPOT_BUY'
             }, operation)
 
-            session.commit()
-
-            operation.spot_relation
+def resetSpotBalance(asset):
+    with Session(model.get_engine()) as session, session.begin():
+        spot_balance = session.query(model.SpotBalance).get(asset)
+        spot_balance.outdated = True
 
 def task_operation_spot_buy():
     while app.running:
@@ -78,6 +78,8 @@ def task_operation_spot_buy():
                 quantity_to_buy = buy_per_contract * SPOT_BUY_OVERBUY_MARGIN * contract_qty - future_balance
                 quantity_to_buy = utils.get_quantity_rounded(quantity_to_buy, tick_size)
 
+                resetSpotBalance("USDT")
+
                 spot_order = binance_client.order_market_buy(symbol=spot_symbol, quantity=quantity_to_buy)
 
                 save_operation_buy_spot(best_position, spot_order)
@@ -91,7 +93,10 @@ def task_operation_spot_buy():
 
 if __name__ == '__main__':
     # task_operation_spot_buy()
-    position = {'position_id': None, 'future_symbol': 'BCHUSD_210924', 'future_price': 588.23, 'spot_symbol': 'BCHUSDT', 'spot_price': 575.36, 'direct_ratio': 2.2368596087410486, 'hours': 2486, 'hour_ratio': 0.0008997826262031572, 'days': 103, 'year_ratio': 7.882095805539657, 'contract_size': 10, 'buy_per_contract': 0.017000153565840316, 'tick_size': 1e-05, 'base_asset': 'BCH', 'signal': 'open', 'contract_qty': 3.0, 'future_balance': 5.319e-05}
-    order = {'symbol': 'BCHUSDT', 'orderId': 1996268268, 'orderListId': -1, 'clientOrderId': 'kbVO3Lhi9mJ7U4b5g0Roju', 'transactTime': 1623512446046, 'price': '0.00000000', 'origQty': '0.05196000', 'executedQty': '0.05196000', 'cummulativeQuoteQty': '30.08743800', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'fills': [{'price': '579.05000000', 'qty': '0.05196000', 'commission': '0.00006616', 'commissionAsset': 'BNB', 'tradeId': 94362645}]}
-
-    save_operation_buy_spot(position, order)
+    # position = {'position_id': None, 'future_symbol': 'BCHUSD_210924', 'future_price': 588.23, 'spot_symbol': 'BCHUSDT', 'spot_price': 575.36, 'direct_ratio': 2.2368596087410486, 'hours': 2486, 'hour_ratio': 0.0008997826262031572, 'days': 103, 'year_ratio': 7.882095805539657, 'contract_size': 10, 'buy_per_contract': 0.017000153565840316, 'tick_size': 1e-05, 'base_asset': 'BCH', 'signal': 'open', 'contract_qty': 3.0, 'future_balance': 5.319e-05}
+    # order = {'symbol': 'BCHUSDT', 'orderId': 1996268268, 'orderListId': -1, 'clientOrderId': 'kbVO3Lhi9mJ7U4b5g0Roju', 'transactTime': 1623512446046, 'price': '0.00000000', 'origQty': '0.05196000', 'executedQty': '0.05196000', 'cummulativeQuoteQty': '30.08743800', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'MARKET', 'side': 'BUY', 'fills': [{'price': '579.05000000', 'qty': '0.05196000', 'commission': '0.00006616', 'commissionAsset': 'BNB', 'tradeId': 94362645}]}
+    #
+    # save_operation_buy_spot(position, order)
+    #
+    # print(model_service.get_current_ratios_to_open())
+    resetSpotBalance('USDT')

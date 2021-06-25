@@ -182,7 +182,7 @@ def get_current_ratios_to_open():
         min_year_ratio = session.query(model.Configuration).get("min_year_ratio").value
         min_direct_ratio = session.query(model.Configuration).get("min_direct_ratio").value
 
-        future_ratios = session.query(model.CurrentOperationsToOpen).join(model.CurrentOperationsToOpen.current_signal). \
+        future_ratios = session.query(model.CurrentOperationsToOpen).join(model.CurrentOperationsToOpen.current_signal).\
             filter(model.CurrentOperationsToOpen.year_ratio > min_year_ratio).\
             filter(model.CurrentOperationsToOpen.direct_ratio > min_direct_ratio). \
             filter(model.CurrentOperationsToOpen.signal == 'open')
@@ -190,7 +190,7 @@ def get_current_ratios_to_open():
         future_ratios = future_ratios.filter(
             or_(
                 and_(
-                    model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio,
+                    # model.CurrentSignal.daily_avg_year_ratio > model.CurrentSignal.weekly_avg_year_ratio,
                     model.CurrentSignal.six_hours_avg_year_ratio > model.CurrentSignal.daily_avg_year_ratio,
                     model.CurrentSignal.hourly_avg_year_ratio > model.CurrentSignal.six_hours_avg_year_ratio,
                     model.CurrentSignal.ten_minutes_avg_year_ratio > model.CurrentSignal.hourly_avg_year_ratio
@@ -200,7 +200,7 @@ def get_current_ratios_to_open():
                 )
             )
 
-        future_ratios = future_ratios.all()
+        future_ratios = future_ratios.order_by(model.CurrentOperationsToOpen.year_ratio.desc()).limit(1)
 
         for future_ratio in future_ratios:
             futures_info.append({
@@ -423,6 +423,9 @@ def save_spot_order(engine, spot_order_dict: Dict):
             with session.begin():
 
                 orderId = spot_order_dict.get('orderId')
+
+                if not orderId:
+                    orderId = spot_order_dict.get('i')
 
                 if orderId:
                     spot_order = session.query(model.SpotOrder).filter_by(order_id=orderId).first()

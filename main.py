@@ -49,7 +49,12 @@ if __name__ == '__main__':
 
     model_view.create_views()
 
+    model_service.check_config()
+
     init_leverages()
+
+    thread_account_update = Thread(name="task_account_update", target=task_account_update)
+    thread_account_update.start()
 
     task_current_futures = Thread(name="task_current_futures", target=task_current_futures)
     task_current_futures.start()
@@ -96,23 +101,20 @@ if __name__ == '__main__':
     task_stock_bnb = Thread(name="task_stock_bnb", target=task_stock_bnb)
     task_stock_bnb.start()
 
-    thread_account_update = Thread(name="task_account_update", target=task_account_update)
-    thread_account_update.start()
-
-    thread_operation_transfer = Thread(name="task_operation_transfer", target=task_operation_transfer)
-    thread_operation_transfer.start()
-
-    thread_operation_spot_buy = Thread(name="task_operation_spot_buy", target=task_operation_spot_buy)
-    thread_operation_spot_buy.start()
-
-    thread_operation_spot_sell = Thread(name="task_operation_spot_sell", target=task_operation_spot_sell)
-    thread_operation_spot_sell.start()
-
-    thread_operation_future_buy = Thread(name="task_operation_future_buy", target=task_operation_future_buy)
-    thread_operation_future_buy.start()
-
-    thread_operation_future_sell = Thread(name="task_operation_future_sell", target=task_operation_future_sell)
-    thread_operation_future_sell.start()
+    # thread_operation_transfer = Thread(name="task_operation_transfer", target=task_operation_transfer)
+    # thread_operation_transfer.start()
+    #
+    # thread_operation_spot_buy = Thread(name="task_operation_spot_buy", target=task_operation_spot_buy)
+    # thread_operation_spot_buy.start()
+    #
+    # thread_operation_spot_sell = Thread(name="task_operation_spot_sell", target=task_operation_spot_sell)
+    # thread_operation_spot_sell.start()
+    #
+    # thread_operation_future_buy = Thread(name="task_operation_future_buy", target=task_operation_future_buy)
+    # thread_operation_future_buy.start()
+    #
+    # thread_operation_future_sell = Thread(name="task_operation_future_sell", target=task_operation_future_sell)
+    # thread_operation_future_sell.start()
 
 
 

@@ -50,6 +50,8 @@ def bring_data_db(ticker, k ,table, column_name_symbol = 'future_symbol'):
 
 def sma(data, k, column_name = 'year_ratio'):
 
+    data = data.copy()
+
     try:
         data['sma'] = data[column_name].rolling(k).mean()
 
@@ -61,6 +63,8 @@ def sma(data, k, column_name = 'year_ratio'):
         return None
 
 def ema(data, k, column_name = 'year_ratio'):
+
+    data = data.copy()
 
     try:
         data['ema'] = data[column_name].ewm(span= k, adjust=False).mean()
