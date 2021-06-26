@@ -105,19 +105,19 @@ if __name__ == '__main__':
     thread_operation_max_historical_ratio = Thread(name="task_max_historical_ratio", target=task_max_historical_ratio)
     thread_operation_max_historical_ratio.start()
 
-    # thread_operation_transfer = Thread(name="task_operation_transfer", target=task_operation_transfer)
-    # thread_operation_transfer.start()
-    #
-    # thread_operation_spot_buy = Thread(name="task_operation_spot_buy", target=task_operation_spot_buy)
-    # thread_operation_spot_buy.start()
-    #
-    # thread_operation_spot_sell = Thread(name="task_operation_spot_sell", target=task_operation_spot_sell)
-    # thread_operation_spot_sell.start()
-    #
-    # thread_operation_future_buy = Thread(name="task_operation_future_buy", target=task_operation_future_buy)
-    # thread_operation_future_buy.start()
-    #
-    # thread_operation_future_sell = Thread(name="task_operation_future_sell", target=task_operation_future_sell)
-    # thread_operation_future_sell.start()
+    thread_operation_transfer = Thread(name="task_operation_transfer", target=task_operation_transfer)
+    thread_operation_transfer.start()
+
+    thread_operation_spot_buy = Thread(name="task_operation_spot_buy", target=task_operation_spot_buy)
+    thread_operation_spot_buy.start()
+
+    thread_operation_spot_sell = Thread(name="task_operation_spot_sell", target=task_operation_spot_sell)
+    thread_operation_spot_sell.start()
+
+    thread_operation_future_buy = Thread(name="task_operation_future_buy", target=task_operation_future_buy)
+    thread_operation_future_buy.start()
+
+    thread_operation_future_sell = Thread(name="task_operation_future_sell", target=task_operation_future_sell)
+    thread_operation_future_sell.start()
 
 

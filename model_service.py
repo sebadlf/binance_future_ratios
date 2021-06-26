@@ -182,7 +182,7 @@ def get_current_ratios_to_open():
         min_year_ratio = session.query(model.Configuration).get("min_year_ratio").value
         min_direct_ratio = session.query(model.Configuration).get("min_direct_ratio").value
 
-        future_ratios = not session.query(model.CurrentOperationsToOpen).join(
+        future_ratios = session.query(model.CurrentOperationsToOpen).join(
             model.CurrentOperationsToOpen.current_signal). \
             filter(model.CurrentOperationsToOpen.year_ratio > min_year_ratio). \
             filter(model.CurrentOperationsToOpen.direct_ratio > min_direct_ratio). \
@@ -625,13 +625,12 @@ def sync_future_balances(engine, future_balances):
                 future_balance = model.FutureBalance(asset=asset)
                 session.add(future_balance)
 
-            future_balance.wallet_balance = future_balance_dict['wb']
-            future_balance.cross_wallet_balance = future_balance_dict['cw']
-            future_balance.balance_change = future_balance_dict['bc']
-
             if future_balance.cross_wallet_balance != future_balance_dict['cw']:
                 future_balance.outdated = False
 
+            future_balance.wallet_balance = future_balance_dict['wb']
+            future_balance.cross_wallet_balance = future_balance_dict['cw']
+            future_balance.balance_change = future_balance_dict['bc']
 
 def sync_spot_balances(engine, spot_balances):
     with Session(engine) as session, session.begin():

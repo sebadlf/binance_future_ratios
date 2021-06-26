@@ -98,5 +98,5 @@ if __name__ == '__main__':
     #
     # save_operation_buy_spot(position, order)
     #
-    # print(model_service.get_current_ratios_to_open())
-    resetSpotBalance('USDT')
+    print(model_service.get_current_ratios_to_open())
+    # resetSpotBalance('USDT')
