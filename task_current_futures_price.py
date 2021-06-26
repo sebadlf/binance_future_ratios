@@ -32,7 +32,7 @@ def task_current_futures_price():
 
         cache[symbol] = data
 
-    streams = [f"{symbol.lower()}@bookTicker" for symbol in get_current_futures()]
+    streams = [f"{symbol.lower()}@bookTicker" for symbol in get_current_futures(process_engine=engine)]
 
     twm.start_futures_multiplex_socket(callback=handle_socket_message, streams=streams, futures_type=FuturesType.COIN_M)
 

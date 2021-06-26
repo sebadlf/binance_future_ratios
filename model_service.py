@@ -31,8 +31,10 @@ spot_symbols_with_futures = [
 ]
 
 
-def get_current_futures():
-    with Session(engine) as session, session.begin():
+def get_current_futures(process_engine = None):
+    selected_engine = process_engine if process_engine is not None else engine
+
+    with Session(selected_engine) as session, session.begin():
         futures = session.query(model.Future.symbol).filter(model.Future.symbol.notlike('%_PERP')).filter_by(contract_status='TRADING').all()
 
         symbols = [future[0] for future in futures]

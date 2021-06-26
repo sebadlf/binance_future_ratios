@@ -89,7 +89,7 @@ def task_current_futures_order_book():
 
         cache[symbol] = data
 
-    streams = [f"{symbol.lower()}@depth{config.DEPTH}@{config.MS}ms" for symbol in get_current_futures()]
+    streams = [f"{symbol.lower()}@depth{config.DEPTH}@{config.MS}ms" for symbol in get_current_futures(process_engine=engine)]
 
     # tickers_streams = {}
     #
