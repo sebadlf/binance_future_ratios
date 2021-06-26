@@ -62,6 +62,7 @@ def resetSpotBalance(asset):
 def task_operation_spot_buy():
     while app.running:
         try:
+            best_position = None
             spot_order = None
 
             best_positions = [row for row in model_service.get_current_ratios_to_open()]
