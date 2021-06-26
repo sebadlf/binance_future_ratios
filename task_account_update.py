@@ -4,6 +4,8 @@ import time
 from model_service import sync_future_balances, sync_future_positions, save_future_order, save_future_trade, save_spot_order, save_spot_trade, sync_spot_balances
 import model
 
+import traceback
+
 engine = model.get_engine()
 
 def update_futures_account(engine, msg):
@@ -37,20 +39,29 @@ def task_account_update():
     twm.start()
 
     def handle_account_update(msg):
-        print(msg)
+        try:
 
-        if msg['e'] == 'ACCOUNT_UPDATE':
-            update_futures_account(engine, msg)
-        if msg['e'] == 'ORDER_TRADE_UPDATE':
-            sync_futures_order(engine, msg)
+            if msg['e'] == 'ACCOUNT_UPDATE':
+                update_futures_account(engine, msg)
+            if msg['e'] == 'ORDER_TRADE_UPDATE':
+                sync_futures_order(engine, msg)
 
-        if msg['e'] == 'outboundAccountPosition':
-            update_spot_account(engine, msg)
-        if msg['e'] == 'executionReport':
-            sync_spot_order(engine, msg)
+            if msg['e'] == 'outboundAccountPosition':
+                update_spot_account(engine, msg)
+            if msg['e'] == 'executionReport':
+                sync_spot_order(engine, msg)
 
-    twm.start_user_socket(handle_account_update)
-    twm.start_coin_futures_socket(handle_account_update)
+        except Exception as ex:
+            print(ex)
+            traceback.print_stack()
+
+    try:
+        twm.start_user_socket(handle_account_update)
+        twm.start_coin_futures_socket(handle_account_update)
+    except Exception as ex:
+        print(ex)
+        traceback.print_stack()
+
 
 if __name__ == '__main__':
     task_account_update()

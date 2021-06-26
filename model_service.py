@@ -458,7 +458,8 @@ def save_spot_trade(engine, spot_trade_dict: Dict):
 
                 if trade_id:
                     spot_trade = session.query(model.SpotTrade).filter_by(binance_id=trade_id).first()
-                else:
+
+                if not spot_trade:
                     spot_trade = model.SpotTrade()
                     session.add(spot_trade)
 
@@ -542,7 +543,8 @@ def save_future_trade(engine, future_trade_dict: Dict):
 
                 if trade_id:
                     future_trade = session.query(model.FutureTrade).filter_by(binance_id=trade_id).first()
-                else:
+
+                if not future_trade:
                     future_trade = model.FutureTrade()
                     session.add(future_trade)
 

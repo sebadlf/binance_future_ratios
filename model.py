@@ -427,7 +427,7 @@ class FutureOrder(Base):
 
     order_id = Column(BigInteger, unique=True)
     pair = Column(String(20))
-    status = Column(String(10))
+    status = Column(String(20))
     client_order_id = Column(String(24))
     price = Column(Float)
     avg_price = Column(Float)

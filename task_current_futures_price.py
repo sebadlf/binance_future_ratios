@@ -1,6 +1,8 @@
 from streams import ThreadedWebsocketManager, FuturesType
 from binance_service import binance_client
 
+import traceback
+
 import keys
 
 import time
@@ -46,6 +48,7 @@ def task_current_futures_price():
                 sync_futures_prices(engine, to_save)
         except Exception as ex:
             print(ex)
+            traceback.print_stack()
 
 if __name__ == '__main__':
     task_current_futures_price()
