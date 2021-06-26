@@ -34,6 +34,9 @@ def save_future_buy(operation_dict: Dict, future_order_dict: Dict):
 
             future_order = session.query(model.FutureOrder).filter_by(order_id=order_id).first()
 
+            if future_order:
+                print(f"Encontre future order = {future_order.id}, {future_order.status}")
+
             future_buy = model_helper.sync_future_order(future_order_dict, future_order)
 
             operation.future_order = future_buy
@@ -113,8 +116,19 @@ if __name__ == '__main__':
     #
     # model_service.save_future_order(model.get_engine(), future_order)
 
+    future_order_dict = {'e': 'ORDER_TRADE_UPDATE', 'T': 1624660050915, 'E': 1624660050920, 'i': 'mYTifWFzFzTiSg', 'o': {'s': 'BTCUSD_210924', 'c': 'cGrUHhHKzNnu430WIpsUXk', 'S': 'BUY', 'o': 'MARKET', 'f': 'GTC', 'q': '2', 'p': '0', 'ap': '32222.7', 'sp': '0', 'x': 'TRADE', 'X': 'FILLED', 'i': 764575533, 'l': '2', 'z': '2', 'L': '32222.7', 'n': '0.00000310', 'N': 'BTC', 'T': 1624660050915, 't': 8905541, 'b': '0', 'a': '0', 'm': False, 'R': False, 'wt': 'CONTRACT_PRICE', 'ot': 'MARKET', 'ps': 'BOTH', 'cp': False, 'ma': 'BTC', 'rp': '0.00038223', 'pP': False, 'si': 0, 'ss': 0}}
 
-    resetFutureBalance("BTCUSD_210924")
+    future_order_dict = future_order_dict['o']
 
+    with Session(model.get_engine()) as session:
+        with session.begin():
 
+            order_id = future_order_dict['i']
+
+            future_order = session.query(model.FutureOrder).filter_by(order_id=order_id).first()
+
+            if future_order:
+                print(f"Encontre future order = {future_order.id}, {future_order.status}")
+
+            future_buy = model_helper.sync_future_order(future_order_dict, future_order)
 

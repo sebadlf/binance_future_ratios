@@ -182,10 +182,12 @@ def get_current_ratios_to_open():
         min_year_ratio = session.query(model.Configuration).get("min_year_ratio").value
         min_direct_ratio = session.query(model.Configuration).get("min_direct_ratio").value
 
-        future_ratios = session.query(model.CurrentOperationsToOpen).join(model.CurrentOperationsToOpen.current_signal).\
-            filter(model.CurrentOperationsToOpen.year_ratio > min_year_ratio).\
+        future_ratios = not session.query(model.CurrentOperationsToOpen).join(
+            model.CurrentOperationsToOpen.current_signal). \
+            filter(model.CurrentOperationsToOpen.year_ratio > min_year_ratio). \
             filter(model.CurrentOperationsToOpen.direct_ratio > min_direct_ratio). \
-            filter(model.CurrentOperationsToOpen.signal == 'open')
+            filter(model.CurrentOperationsToOpen.signal == 'open').\
+            filter(model.CurrentOperationsToOpen.contract_qty > 0)
 
         future_ratios = future_ratios.filter(
             or_(
@@ -236,7 +238,7 @@ def get_current_operations_to_close():
         current_operation_to_close = current_operation_to_close.filter(
             or_(
                 and_(
-                    model.CurrentOperationToClose.direct_ratio_diff > 0.5,
+                    model.CurrentOperationToClose.direct_ratio_diff > 0.4,
                     model.CurrentOperationToClose.better_direct_ratio > model.CurrentOperationToClose.direct_ratio + 0.5
                 ),
 
@@ -429,7 +431,8 @@ def save_spot_order(engine, spot_order_dict: Dict):
 
                 if orderId:
                     spot_order = session.query(model.SpotOrder).filter_by(order_id=orderId).first()
-                else:
+
+                if not spot_order:
                     spot_order = model.SpotOrder()
                     session.add(spot_order)
 
@@ -509,7 +512,8 @@ def save_future_order(engine, future_order_dict: Dict):
 
                 if order_id:
                     future_order = session.query(model.FutureOrder).filter_by(order_id=order_id).first()
-                else:
+
+                if not future_order:
                     future_order = model.FutureOrder()
                     session.add(future_order)
 
@@ -803,4 +807,4 @@ def save_max_historical_ratio(time, data):
 
 
 if __name__ == '__main__':
-    pass
+    print(get_current_ratios_to_open())

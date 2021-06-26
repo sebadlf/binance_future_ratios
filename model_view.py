@@ -98,6 +98,9 @@ current_operations_to_open = '''
     on			s.base_asset = fb.asset
     LEFT JOIN 	(select max(id) as id, p.future from position p where p.state = 'CREATED' group by  p.future) pos
     ON			cr.future_symbol = pos.future
+	HAVING 		contract_qty > 0
+	ORDER BY	year_ratio desc
+	LIMIT		0, 1
 '''
 
 
@@ -118,22 +121,16 @@ current_operations_to_close = '''
                 avg_open_ratios.year_ratio - crtc.year_ratio year_ratio_diff, 
                 crtc.*,
                 -fp.position_amount as contract_qty,
-                crto.future_symbol as better_future_symbol,
-                crto.direct_ratio as better_direct_ratio,
-                crto.year_ratio as better_year_ratio
+                best_future_to_open.future_symbol as better_future_symbol,
+                best_future_to_open.direct_ratio as better_direct_ratio,
+                best_future_to_open.year_ratio as better_year_ratio
     from 		current_ratios_to_close crtc
     join 
     (select 	
                 o.position_id, 
                 min(o.future) as future, 
                 sum(o.direct_ratio*o.contract_qty) / sum(o.contract_qty) direct_ratio, 
-                sum(o.year_ratio*o.contract_qty) / sum(o.contract_qty) year_ratio,
-                (select future_symbol 
-                from current_ratios_to_open co 
-                where co.future_symbol != min(o.future)
-                    and co.direct_ratio > sum(o.direct_ratio*o.contract_qty) / sum(o.contract_qty)
-                    and co.year_ratio > sum(o.year_ratio*o.contract_qty) / sum(o.contract_qty)
-                order by co.year_ratio desc limit 0,1) better_future_symbol
+                sum(o.year_ratio*o.contract_qty) / sum(o.contract_qty) year_ratio
     from 		operation o 
     join 		position p
     on			o.position_id = p.id
@@ -143,8 +140,10 @@ current_operations_to_close = '''
     on 			crtc.future_symbol = avg_open_ratios.future
     join 		future_position fp
     on			avg_open_ratios.future = fp.symbol
-    left join 	current_ratios_to_open crto
-    on			better_future_symbol = crto.future_symbol
+    left join 	(select future_symbol, direct_ratio, year_ratio from current_ratios_to_open limit 0, 1) best_future_to_open
+      on 		  crtc.future_symbol != best_future_to_open.future_symbol
+				and crtc.direct_ratio < best_future_to_open.direct_ratio
+				and crtc.year_ratio != best_future_to_open.year_ratio
     '''
 
 historical_ratios = '''
